@@ -1,0 +1,26 @@
+#:kivy 1.0
+
+<MyGridLayout>
+    GridLayout:
+        cols:1
+
+        GridLayout:
+            cols:2
+
+            Label:
+                text: "Name"
+            TextInput:
+                multiline:False
+
+            Label:
+                text: "Pizza"
+            TextInput:
+                multiline:False
+
+            Label:
+                text: "Colour"
+            TextInput:
+                multiline:False
+
+        Button:
+            text: "Submit"

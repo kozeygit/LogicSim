@@ -1,0 +1,19 @@
+add gates connected to end of nodes to array,
+run through array and add gates to queue.
+run through the queue and execute each node to work out output
+
+- Make a queue class
+- add function to gate class to add node its output is connected to to array within object
+-
+
+
+thing to look up more about:
+- javascript
+- css
+- html
+- api
+- linking pythonbackend to frontend website
+- webGl (animation and stuff)
+- js events
+- maybe some sort of database
+- 

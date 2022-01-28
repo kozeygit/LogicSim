@@ -1,0 +1,33 @@
+Test Case:
+- test type
+- inputs
+- expected
+- output - pass
+	 - fail - notes
+
+Types of Test:
+- Normal
+- Boundary - Out of range
+	   - In range
+	   - Border
+- Extreme - Try/Catch
+	  - Really large numbers - Ask to retry, don't let them enter large numbers
+	  - Really small numbers /
+- Exceptional - Zero
+	      - Negative
+	      - Null
+	      - "" - Nothing entered
+	      - "    " - Only spaces entered
+
+Types of testing
+Modular - test as you're going
+Black Box - enter inputs, record outputs, compare to expected outputs, does not look at code
+White Box - if black box gives an error, you would trace through the code to find the problem
+system testing - testing the completed system/code
+	       - Running through to see how it runs when complete
+user testing - having the end-user test the completed system
+	     - How does it work in the real world
+	     - can they understand how to use the ui
+
+Place screen shots for test in seperate document
+can use video
