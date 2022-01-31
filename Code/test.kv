@@ -1,9 +1,13 @@
 #:kivy 1.0
 
 <MyGridLayout>
+    name:name
+    pizza:pizza
+    colour:colour
+    
     GridLayout:
         cols:1
-
+        size: root.width, root.height
         GridLayout:
             cols:2
 
@@ -11,16 +15,20 @@
                 text: "Name"
             TextInput:
                 multiline:False
+                id:name
 
             Label:
                 text: "Pizza"
             TextInput:
                 multiline:False
+                id:pizza
 
             Label:
                 text: "Colour"
             TextInput:
                 multiline:False
+                id:colour
 
         Button:
             text: "Submit"
+            on_press: root.press()

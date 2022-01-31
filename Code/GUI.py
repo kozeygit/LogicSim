@@ -7,18 +7,24 @@ from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
+from kivy.properties import ObjectProperty
 
 class MyGridLayout(Widget):
+    name = ObjectProperty(None)
+    pizza = ObjectProperty(None)
+    colour = ObjectProperty(None)
 
-    def press(self, instance):
+    def press(self):
         name = self.name.text
         pizza = self.pizza.text
+        colour = self.colour.text
 
-        self.top_grid.add_widget(Label(text=f"Hello {name}, you like {pizza} pizza!"))
+        #self.top_grid.add_widget(Label(text=f"Hello {name}, you like {pizza} pizza!"))
         print(f"Hello {name}, you like {pizza} pizza!")
 
         self.name.text = ""
         self.pizza.text = ""
+        self.colour.text = ""
 
 
 
