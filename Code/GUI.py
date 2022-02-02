@@ -2,12 +2,23 @@
 import kivy
 kivy.require('1.0.1')
 from kivy.app import App
+from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
+from kivy.config import Config
+from kivy.core.window import Window
+from kivy.graphics import Color, Line, Rectangle, RoundedRectangle
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 from kivy.properties import ObjectProperty
+
+class LogicGate(Widget):
+    def __init__(self, **kwargs):
+        pass
+
 
 class MyGridLayout(Widget):
     name = ObjectProperty(None)
@@ -30,7 +41,7 @@ class MyGridLayout(Widget):
 
 class TestApp(App):
     def build(self):
-        return MyGridLayout()
+        return FloatLayout()
 
 
 if __name__ == '__main__':
