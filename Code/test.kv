@@ -1,9 +1,27 @@
 #:kivy 1.0
 
+<Button>
+    font_size:40
+    color: 0.3,0.6,0.7,1
+    size_hint: 0.3, 0.5
+
+<FloatLayout>
+    Button:
+        pos_hint: {"x":0.5 ,"top":0.5}
+        text: "Tech With"
+
+    Button:
+        # a button has three states
+        # Normal: Not clicked, Down: Clicked, Hover: Hovered over
+        id: btn
+        text: "Tim" if btn.state == "normal" else "Down"
+        background_color: [0.3,0.4,0.5,1] if btn.state == "normal" else [0,0,1,1]
+
 <MyGridLayout>
-    name:name
-    pizza:pizza
-    colour:colour
+    
+    name: name
+    pizza: pizza
+    colour: colour
     
     GridLayout:
         cols:1
@@ -14,21 +32,22 @@
             Label:
                 text: "Name"
             TextInput:
-                multiline:False
-                id:name
+                multiline: False
+                id: name
 
             Label:
                 text: "Pizza"
             TextInput:
-                multiline:False
-                id:pizza
+                multiline: False
+                id: pizza
 
             Label:
                 text: "Colour"
             TextInput:
-                multiline:False
-                id:colour
+                multiline: False
+                id: colour
 
         Button:
             text: "Submit"
             on_press: root.press()
+
