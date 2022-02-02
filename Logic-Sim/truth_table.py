@@ -56,28 +56,34 @@ def generateTruthTable(expression):
 
     final = do(exp, v, len(perm))
 
-    print("Boolean Expression: " + expression.upper())
-    print()
+    fs = ''
+    fs = fs + str("Boolean Expression: " + expression.upper() + "\n")
     for i in final:
         if i.lower() == 'out':
-            print(f"|{i}", end='')
+            fs = fs + (f"|{i}")
         else:
-            print(f"| {i} ", end='')
-    print('|')
+            fs = fs + (f"| {i} ")
+    fs = fs + ('|\n')
     for i in range(len(perm)):
         for ii in final:
-            print(f"| {final[ii][i]} ", end='')
-        print('|')
+            fs = fs + (f"| {final[ii][i]} ")
+        fs = fs + ('|\n')
 
+    #printTruthTable(fs)
+    return fs
 
+def printTruthTable(truth_table_string):
+    print(truth_table_string)
 
 if __name__ == '__main__':
     sys('clear')
     e = input('Here: ')
-    generateTruthTable(e)
+    print(generateTruthTable(e))
     print()
 
 
     """NOT ((A and B) or (c and not B))"""
+
+
 
 

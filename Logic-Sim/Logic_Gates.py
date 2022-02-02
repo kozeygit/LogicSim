@@ -8,7 +8,6 @@ class Gate: #Logic gates parent class
         self._input_node2 = False
         self._output_nodes = []
         self._output = 0
-        self._operator = None
         self._type = ''
         self.expression = None
         
@@ -27,7 +26,7 @@ class Gate: #Logic gates parent class
                 exp1 = self._input_node1.getExpression()
             else:
                 exp1 = f"({self._input_node1.getExpression()})"
-            
+                
             if self._input_node2.getGateType() == 'switch':
                 exp2 = self._input_node2.getExpression()
             else:
@@ -94,7 +93,6 @@ class Gate: #Logic gates parent class
 class And_Gate(Gate):
     def __init__(self):
         super().__init__()
-        self._operator = '&'
         self._type = 'and'
         self.name = f"{self._type}_{str(self.id)}"
         
@@ -106,7 +104,6 @@ class And_Gate(Gate):
 class Or_Gate(Gate):
     def __init__(self):
         super().__init__()
-        self._operator = '|'
         self._type = 'or'
         self.name = f"{self._type}_{str(self.id)}"
 
@@ -116,7 +113,6 @@ class Or_Gate(Gate):
 class Xor_Gate(Gate):
     def __init__(self):
         super().__init__()
-        self._operator = '^'
         self._type = 'xor'
         self.name = f"{self._type}_{str(self.id)}"
 
@@ -126,7 +122,6 @@ class Xor_Gate(Gate):
 class Not_Gate(Gate):
     def __init__(self):
         super().__init__()
-        self._operator = '2+~'
         self._type = 'not'
         self.name = f"{self._type}_{str(self.id)}"
 
@@ -217,7 +212,7 @@ class Output:
         gate.connectNode(-1, self)
 
     def truthTable(self):
-        generateTruthTable(self.getExpression())
+        return generateTruthTable(self.getExpression())
 
 
     def getOutput(self):
