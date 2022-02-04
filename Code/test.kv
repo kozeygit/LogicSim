@@ -1,21 +1,73 @@
 #:kivy 1.0
 
-<Button>
-    font_size:40
-    color: 0.3,0.6,0.7,1
-    size_hint: 0.3, 0.5
+<ActionButton>
+    font_size:15
+    color: 1,1,1,1
+    background_normal: ''
+    background_color: 0.4,0.4,0.4,1
 
-<FloatLayout>
-    Button:
-        pos_hint: {"x":0.5 ,"top":0.5}
-        text: "Tech With"
+<GridLayout>
+    padding: 2
+    spacing: 2
+    canvas.before:
+        Color:
+            rgba: (0.8,0.8,0.8,1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
-    Button:
-        # a button has three states
-        # Normal: Not clicked, Down: Clicked, Hover: Hovered over
-        id: btn
-        text: "Tim" if btn.state == "normal" else "Down"
-        background_color: [0.3,0.4,0.5,1] if btn.state == "normal" else [0,0,1,1]
+<MainWindow>
+    GridLayout:
+        size: root.width, root.height
+        rows:2
+        orientaion: "tb-lr"
+        ActionBar:
+            size: root.width, 30
+            pos_hint: {"top":1}
+
+            ActionView:
+                spacing: 2
+                padding: 2
+                ActionPrevious:
+                    with_previous: False
+                    font_size: 40
+                    markup: True
+                    title: " [b]Logic Gate Simultor[/b]"
+                    app_icon: ''
+                ActionButton:
+                    text: "Save"
+                ActionButton:
+                    text: "Load"
+                ActionButton:
+                    text: "Help"
+                ActionButton:
+                    text: "Quit"
+                
+        
+        GridLayout:
+            cols: 3
+            padding: 0
+            Button:
+                text: "Hello"
+            Button:
+                text: "Hello"
+            Button:
+                text: "Hello"
+
+<MyLayout>
+    FloatLayout:
+        canvas.before: 
+        size: root.width, root.height
+        Button:
+            pos_hint: {"x":0.5 ,"top":0.5}
+            text: "Tech With"
+
+        Button:
+            # a button has three states
+            # Normal: Not clicked, Down: Clicked, Hover: Hovered over
+            id: btn
+            text: "Tim" if btn.state == "normal" else "Down"
+            background_color: [0.3,0.4,0.5,1] if btn.state == "normal" else [0,0,1,1]
 
 <MyGridLayout>
     
