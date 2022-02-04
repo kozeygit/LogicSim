@@ -34,12 +34,13 @@ class Board:
         gate_type = gate_type.lower()
         return gate_lists[gate_type]
 
+    def getTruthTable(self, gate):
+        pass
+
     def clearBoard(self):
         self.inputs = []
         self.gates = []
         self.outputs = []
-
-
     
     def getGate(self, gate_id):
         pass

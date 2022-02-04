@@ -61,7 +61,9 @@ print(n1.getExpression())
 a2.connectNode(1, n1)
 a2.connectNode(2, s1)
 
+print(o1._input_node)
 o1.connectNode(a2)
+print(o1._input_node)
 
 ex = o1.getExpression()
 

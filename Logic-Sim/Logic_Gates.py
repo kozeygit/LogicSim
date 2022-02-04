@@ -9,19 +9,24 @@ class Gate: #Logic gates parent class
         self._output_nodes = []
         self._output = 0
         self._type = ''
-        self.expression = None
+        self._expression = None
         
         self.id = Gate.ID
         Gate.ID += 1
 
-    def hasInputs(self):
-        return self._input_node1 and self._input_node2
+    def hasInput(self, node=0):
+        if node == 0:
+            return self._input_node1 and self._input_node2
+        elif node == 1:
+            return self._input_node1 and True
+        elif node == 2:
+            return self._input_node2 and True
     
     def evaluate(self):
         return
 
     def updateExpression(self):
-        if self.hasInputs():
+        if self.hasInput():
             if self._input_node1.getGateType() == 'switch':
                 exp1 = self._input_node1.getExpression()
             else:
@@ -32,17 +37,17 @@ class Gate: #Logic gates parent class
             else:
                 exp2 = f"({self._input_node2.getExpression()})"
             
-            self.expression = f"{exp1} {self._type} {exp2}"
+            self._expression = f"{exp1} {self._type} {exp2}"
         else:
-            self.expression = None
+            self._expression = None
 
     def getExpression(self):
-        return self.expression
+        return self._expression
 
 
   # Rewrite, doesnt handle flip flop recursion
     def _process(self):
-        if self.hasInputs():
+        if self.hasInput():
             var1 = self._input_node1.getOutput()
             var2 = self._input_node2.getOutput()
             self._output = self.evaluate(var1, var2)
@@ -57,6 +62,9 @@ class Gate: #Logic gates parent class
     def getOutput(self):
         self._process()
         return self._output
+
+    def getName(self):
+        return self.name
 
     def connectNode(self, node, gate):
         if node == 1:
@@ -76,17 +84,20 @@ class Gate: #Logic gates parent class
         elif node == -1:
             self._output_nodes.append(gate)
 
-    def disconnectNode(self, node, gate):
-        if node == 1:
-            self._input_node1.disconnectNode(-1, self)
+    def disconnectNode(self, gate):
+        if self._input_node1 is gate:
+            self._input_node1.disconnectNode(self)
             self._input_node1 = False
             self.updateExpression()
-        elif node == 2:
-            self._input_node1.disconnectNode(-1, self)
+        elif self._input_node1 is gate:
+            self._input_node1.disconnectNode(self)
             self._input_node2 = False
             self.updateExpression()
-        elif node == -1:
+        elif gate in self._output_nodes:
             self._output_nodes.remove(gate)
+        else:
+            print(f"No connection between {self.name} and {gate.getName()}")
+            
 
 
 
@@ -125,7 +136,7 @@ class Not_Gate(Gate):
         self._type = 'not'
         self.name = f"{self._type}_{str(self.id)}"
 
-    def hasInputs(self):
+    def hasInput(self):
         return self._input_node1
 
     def evaluate(self, var1):
@@ -147,16 +158,16 @@ class Not_Gate(Gate):
         elif node == -1:
             self._output_nodes.append(gate)
   
-    def disconnectNode(self, node, gate):
-        if node == 1:
-            self._input_node1.disconnectNode(-1, self)
+    def disconnectNode(self, gate):
+        if self._input_node1 is gate:
+            self._input_node1.disconnectNode(self)
             self._input_node1 = False
             self.updateExpression()
-        elif node == -1:
+        elif gate in self._output_nodes:
             self._output_nodes.remove(gate)
 
     def updateExpression(self):
-        self.expression = str(f"{self._type}({self._input_node1.getExpression()})")
+        self._expression = str(f"{self._type}({self._input_node1.getExpression()})")
 
 
 class Switch:
@@ -179,11 +190,11 @@ class Switch:
         return self._output
 
     def connectNode(self, node, gate):
-        if node == -1:
+        if gate not in self._output_nodes:
             self._output_nodes.append(gate)
 
-    def disconnectNode(self, node, gate):
-        if node == -1:
+    def disconnectNode(self, gate):
+        if node in self._output_nodes:
             self._output_nodes.remove(gate)
 
     def flip(self):
@@ -208,8 +219,9 @@ class Output:
         return self._input_node.getExpression()
 
     def connectNode(self, gate):
-        self._input_node = gate
-        gate.connectNode(-1, self)
+        if self._input_node == None:
+            self._input_node = gate
+            gate.connectNode(-1, self)
 
     def truthTable(self):
         return generateTruthTable(self.getExpression())
