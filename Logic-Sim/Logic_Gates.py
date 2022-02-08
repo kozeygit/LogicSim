@@ -194,7 +194,7 @@ class Switch:
             self._output_nodes.append(gate)
 
     def disconnectNode(self, gate):
-        if node in self._output_nodes:
+        if gate in self._output_nodes:
             self._output_nodes.remove(gate)
 
     def flip(self):

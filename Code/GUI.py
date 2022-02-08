@@ -14,9 +14,9 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 class MainWindow(Widget):
     def closeWindow(self):
         sys.exit()
-    pass
-    
 
+class GateButton(Widget):
+    pass
 
 class LogicGate(Widget):
     def __init__(self, **kwargs):

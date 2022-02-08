@@ -6,6 +6,17 @@
     background_normal: ''
     background_color: 0.4,0.4,0.4,1
 
+<GateButton>
+    Button:
+        text: "gate"
+        font_size: 30
+        size_hint: None, None
+        center: self.parent.center
+
+<GateLabel@Label>
+    font_size: 30
+    color: 0,0,0,1
+
 <GridLayout>
     padding: 2
     spacing: 2
@@ -46,14 +57,66 @@
                 
         
         GridLayout:
-            cols: 3
+            size: self.parent.width, self.parent.height
+            cols: 2
             padding: 0
-            Button:
-                text: "Hello"
-            Button:
-                text: "Hello"
-            Button:
-                text: "Hello"
+            ScrollView:
+                size_hint: None, 1
+                width: 200
+                GridLayout:
+                    size_hint_y: None
+                    height: 900
+                    cols: 1
+                    rows: 2
+                    Label:
+                        size_hint: 1,0.1
+                        markup: True
+                        font_size: 40
+                        color: 0,0,0,1
+                        text: "[b]Gates[/b]"
+                    GridLayout:
+                        cols: 2
+                        spaceing: 1
+                        padding: 1
+                        size: self.parent.size
+                        GateLabel:
+                            text: "And"
+                        GateButton:
+                            id: And
+                        GateLabel:
+                            text: "Or"
+                        GateButton:
+                            id: Or
+                        GateLabel:
+                            text: "Not"
+                        GateButton:
+                            id: Not
+                        GateLabel:
+                            text: "Xor"
+                        GateButton:
+                            id: Xor
+                        GateLabel:
+                            text: "Input"
+                        GateButton:
+                            id: Input
+                        GateLabel:
+                            text: "Output"
+                        GateButton:
+                            id: Output
+                        GateLabel:
+                            text: "Clock"
+                        GateButton:
+                            id: Clock
+            FloatLayout:
+                
+                canvas.before:
+                    Color:
+                        rgba: (0.4,0.8,0.1,1)
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            
 
 <MyLayout>
     FloatLayout:
