@@ -1,5 +1,5 @@
 #:kivy 1.0
-
+#:import Factory kivy.factory.Factory
 <ActionButton>
     font_size:15
     color: 1,1,1,1
@@ -16,6 +16,23 @@
 <GateLabel@Label>
     font_size: 30
     color: 0,0,0,1
+
+<ExitPopup@Popup>:
+    auto_dismiss: False
+    title_color: 0,0,0,1
+    title_size: 20
+    title: "Are you sure you want to quit?"
+    size_hint: None, None
+    size: 300,300
+    BoxLayout:
+        size: self.parent.size
+        orientaion: "vertical"
+        Button:
+            text: 'Cancel'
+            on_release: root.dismiss()
+        Button:
+            text: 'Quit'
+            on_release: root.closeWindow()
 
 <GridLayout>
     padding: 2
@@ -47,13 +64,14 @@
                     app_icon: ''
                 ActionButton:
                     text: "Save"
+                    on_press: Board.add_widget(Button(text='new button'))
                 ActionButton:
                     text: "Load"
                 ActionButton:
                     text: "Help"
                 ActionButton:
                     text: "Quit"
-                    on_release: root.closeWindow()
+                    on_release: Factory.ExitPopup().open()
                 
         
         GridLayout:
@@ -108,7 +126,7 @@
                         GateButton:
                             id: Clock
             FloatLayout:
-                
+                id: Board
                 canvas.before:
                     Color:
                         rgba: (0.4,0.8,0.1,1)

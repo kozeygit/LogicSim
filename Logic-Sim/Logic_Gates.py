@@ -1,6 +1,10 @@
 import time
 from truth_table import *
 
+'''
+Gates Vectors Needed: And, Or, Xor, Not, Switch(on, off), Output(on, off)
+'''
+
 class Gate: #Logic gates parent class
     ID = 0
     def __init__(self):
