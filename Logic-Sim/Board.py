@@ -45,6 +45,9 @@ class Board:
     def getGate(self, gate_id):
         pass
 
+    def save(self):
+        
+
 class Tree:
     def __init__(self):
         self.nodes = []

@@ -126,7 +126,7 @@
                             text: "Clock"
                         GateButton:
                             id: Clock
-            ScatterLayout:
+            FloatLayout:
                 id: Board
                 canvas.before:
                     Color:
@@ -134,5 +134,10 @@
                     Rectangle:
                         pos: self.pos
                         size: self.size
+                Gate:
+                    size_hint: 0.2, 0.2
+                    pos_hint: {"top": 0.5, "x": 0.5}
+                    on_press: self.startDrag
+                    on_release: self.stopDrag
 
         

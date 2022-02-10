@@ -11,6 +11,7 @@ from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.popup import Popup
+from kivy.uix.button import Button
 
 class MainWindow(Widget):
     pass
@@ -19,8 +20,9 @@ class ExitPopup(Popup):
     def closeWindow(self):
         sys.exit()
 
-class Gate(Widget):
-    pass
+class Gate(Scatter):
+    def __init__(self, **kwargs):
+        super(Gate, self).__init__(**kwargs)
 
 class GateButton(Widget):
     pass

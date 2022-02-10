@@ -1,0 +1,2 @@
+https://stackoverflow.com/questions/25273046/using-and-moving-widgets-buttons-in-kivy?rq=1
+

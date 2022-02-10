@@ -18,6 +18,7 @@ class Gate: #Logic gates parent class
         self.id = Gate.ID
         Gate.ID += 1
 
+    # Returns True if node given is empty, or if no node is given, returns True if both are empty. 
     def hasInput(self, node=0):
         if node == 0:
             return self._input_node1 and self._input_node2
@@ -70,7 +71,7 @@ class Gate: #Logic gates parent class
     def getName(self):
         return self.name
 
-    def connectNode(self, node, gate):
+    def connectNode(self, gate, node=None):
         if node == 1:
             if self._input_node1 == False:
                 self._input_node1 = gate
