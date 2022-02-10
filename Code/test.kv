@@ -17,15 +17,14 @@
     font_size: 30
     color: 0,0,0,1
 
-<ExitPopup@Popup>:
-    auto_dismiss: False
+<ExitPopup>
+    auto_dismiss: True
     title_color: 0,0,0,1
     title_size: 20
     title: "Are you sure you want to quit?"
     size_hint: None, None
-    size: 300,300
+    size: 300,150
     BoxLayout:
-        size: self.parent.size
         orientaion: "vertical"
         Button:
             text: 'Cancel'
@@ -33,6 +32,7 @@
         Button:
             text: 'Quit'
             on_release: root.closeWindow()
+
 
 <GridLayout>
     padding: 2
@@ -52,7 +52,6 @@
         ActionBar:
             size: root.width, 30
             pos_hint: {"top":1}
-
             ActionView:
                 spacing: 2
                 padding: 2
@@ -61,7 +60,9 @@
                     font_size: 40
                     markup: True
                     title: " [b]Logic Gate Simultor[/b]"
-                    app_icon: ''
+                    app_icon: "Images/Me.jpg"
+                    app_icon_height: 0
+                    app_icon_width: 0
                 ActionButton:
                     text: "Save"
                     on_press: Board.add_widget(Button(text='new button'))
@@ -125,7 +126,7 @@
                             text: "Clock"
                         GateButton:
                             id: Clock
-            FloatLayout:
+            ScatterLayout:
                 id: Board
                 canvas.before:
                     Color:
@@ -134,54 +135,4 @@
                         pos: self.pos
                         size: self.size
 
-            
-
-<MyLayout>
-    FloatLayout:
-        canvas.before: 
-        size: root.width, root.height
-        Button:
-            pos_hint: {"x":0.5 ,"top":0.5}
-            text: "Tech With"
-
-        Button:
-            # a button has three states
-            # Normal: Not clicked, Down: Clicked, Hover: Hovered over
-            id: btn
-            text: "Tim" if btn.state == "normal" else "Down"
-            background_color: [0.3,0.4,0.5,1] if btn.state == "normal" else [0,0,1,1]
-
-<MyGridLayout>
-    
-    name: name
-    pizza: pizza
-    colour: colour
-    
-    GridLayout:
-        cols:1
-        size: root.width, root.height
-        GridLayout:
-            cols:2
-
-            Label:
-                text: "Name"
-            TextInput:
-                multiline: False
-                id: name
-
-            Label:
-                text: "Pizza"
-            TextInput:
-                multiline: False
-                id: pizza
-
-            Label:
-                text: "Colour"
-            TextInput:
-                multiline: False
-                id: colour
-
-        Button:
-            text: "Submit"
-            on_press: root.press()
-
+        
