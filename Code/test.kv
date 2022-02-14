@@ -1,5 +1,6 @@
 #:kivy 1.0
 #:import Factory kivy.factory.Factory
+
 <ActionButton>
     font_size:15
     color: 1,1,1,1
@@ -7,11 +8,11 @@
     background_color: 0.4,0.4,0.4,1
 
 <GateButton>
-    Button:
-        text: "gate"
-        font_size: 30
-        size_hint: None, None
-        center: self.parent.center
+    text: "gate"
+    font_size: 30
+    size_hint: None, None
+    center: self.parent.center
+    on_press: self.addGateToBoard()
 
 <GateLabel@Label>
     font_size: 30
@@ -50,7 +51,7 @@
         rows:2
         orientaion: "tb-lr"
         ActionBar:
-            size: root.width, 30
+            height: 30
             pos_hint: {"top":1}
             ActionView:
                 spacing: 2
@@ -65,7 +66,6 @@
                     app_icon_width: 0
                 ActionButton:
                     text: "Save"
-                    on_press: Board.add_widget(Button(text='new button'))
                 ActionButton:
                     text: "Load"
                 ActionButton:
@@ -76,6 +76,7 @@
                 
         
         GridLayout:
+            gateCanvas: gateCanvas
             size: self.parent.width, self.parent.height
             cols: 2
             padding: 0
@@ -126,18 +127,12 @@
                             text: "Clock"
                         GateButton:
                             id: Clock
-            FloatLayout:
-                id: Board
+            GateCanvas:
+                id: gateCanvas
                 canvas.before:
                     Color:
-                        rgba: (0.4,0.8,0.1,1)
+                        rgba: (0.1,0.6,0.6,1)
                     Rectangle:
                         pos: self.pos
                         size: self.size
-                Gate:
-                    size_hint: 0.2, 0.2
-                    pos_hint: {"top": 0.5, "x": 0.5}
-                    on_press: self.startDrag
-                    on_release: self.stopDrag
-
-        
+                
