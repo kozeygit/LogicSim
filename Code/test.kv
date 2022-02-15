@@ -8,11 +8,13 @@
     background_color: 0.4,0.4,0.4,1
 
 <GateButton>
-    text: "gate"
-    font_size: 30
-    size_hint: None, None
-    center: self.parent.center
-    on_press: self.addGateToBoard()
+    Button:
+        text: "gate"
+        font_size: 30
+        size_hint: None, None
+        center: self.parent.center
+        on_press: print(root)
+        on_release: root.addGateToCanvas()
 
 <GateLabel@Label>
     font_size: 30
@@ -46,10 +48,12 @@
             size: self.size
 
 <MainWindow>
+    gateCanvas: gateCanvas
+
     GridLayout:
         size: root.width, root.height
         rows:2
-        orientaion: "tb-lr"
+        orientation: "tb-lr"
         ActionBar:
             height: 30
             pos_hint: {"top":1}
@@ -76,10 +80,18 @@
                 
         
         GridLayout:
-            gateCanvas: gateCanvas
             size: self.parent.width, self.parent.height
+            orientation: "tb-rl"
             cols: 2
             padding: 0
+            GateCanvas:
+                id: gateCanvas
+                canvas.before:
+                    Color:
+                        rgba: (0.1,0.6,0.6,1)
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
             ScrollView:
                 size_hint: None, 1
                 width: 200
@@ -127,12 +139,5 @@
                             text: "Clock"
                         GateButton:
                             id: Clock
-            GateCanvas:
-                id: gateCanvas
-                canvas.before:
-                    Color:
-                        rgba: (0.1,0.6,0.6,1)
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
+            
                 

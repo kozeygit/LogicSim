@@ -2,28 +2,31 @@
 import kivy, os, sys
 kivy.require('1.0.1')
 from kivy.app import App
-from kivy.uix.image import Image
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.graphics import Color, Line, Rectangle, RoundedRectangle
-from kivy.uix.widget import Widget
-from kivy.properties import ObjectProperty, NumericProperty, BooleanProperty
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.popup import Popup
+from kivy.properties import ObjectProperty, NumericProperty, BooleanProperty
 from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
-
-class MainWindow(Widget):
-    pass
+from kivy.uix.image import Image
+from kivy.uix.popup import Popup
+from kivy.uix.scatter import Scatter
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.widget import Widget
+from kivy.uix.behaviors import DragBehavior
 
 class ExitPopup(Popup):
     def closeWindow(self):
         sys.exit()
 
-class Gate(Button):
-    def __init__(self, **kwargs):
-        super(Gate, self).__init__(**kwargs)
+
+class MainWindow(Widget):
+    gateCanvas = ObjectProperty(None)
+
+    def addGateToCanvas(self, *args):
+        self.gateCanvas.addGate()
+
 
 class GateCanvas(FloatLayout):
     def __init__(self, **kwargs):
@@ -36,24 +39,26 @@ class GateCanvas(FloatLayout):
 #         print("WOOOO")
 #         self.root.ids[Board].addGate()
 
+    def addGate(self, *args):
+        print("hello")
+        self.add_widget(Gate())
+        print(self.children)
 
-    def addGate(self):
-        img = Image(source="Images/GateIcons/and.png")
-        self.add_widget(img)
-
-class GateButton(Button):
+class GateButton(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def addGateToBoard(self):
-        print("Hello")
-        self.root.ids["Board"].addGate()
+    def addGateToCanvas(self, *args):
+        print(self)
+        self.ids(args)
 
-class LogicGate(Widget):
-    pass
+class Gate(Image):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.source = "Images/GateIcons/and.png"
+        self.size = 200,200
+        self.size_hint = 0.5, 0.5
 
-class MyLayout(Widget):
-    pass
 
 kv = Builder.load_file("test.kv")
 
