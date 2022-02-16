@@ -10,6 +10,7 @@ from kivy.properties import ObjectProperty, NumericProperty, BooleanProperty
 from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
+from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.scatter import Scatter
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -21,44 +22,50 @@ class ExitPopup(Popup):
         sys.exit()
 
 
-class MainWindow(Widget):
-    gateCanvas = ObjectProperty(None)
-
-    def addGateToCanvas(self, *args):
-        self.gateCanvas.addGate()
-
 
 class GateCanvas(FloatLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-#     def on_touch_down(self, touch):
-# # if the touch is not for me, and if i don't want to use it, avoid it.
-#         if not self.collide_point(*touch.pos):
-#             return
-#         print("WOOOO")
-#         self.root.ids[Board].addGate()
+    def on_touch_down(self, touch):
+# if the touch is not for me, and if i don't want to use it, avoid it.
+        if not self.collide_point(*touch.pos):
+            return
+        print("Touchy")
 
     def addGate(self, *args):
         print("hello")
-        self.add_widget(Gate())
+        self.add_widget(DragGate())
         print(self.children)
 
-class GateButton(Widget):
+class GateButton(Button):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def addGateToCanvas(self, *args):
-        print(self)
-        self.ids(args)
+    def addGateToCanvas(self, instance):
+        print(instance)
+        print(instance.children)
+        print(self.parent.parent.parent.parent.ids.gateCanvas)
 
-class Gate(Image):
+class DragGate(DragBehavior, Image):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.text = "Hello"
         self.source = "Images/GateIcons/and.png"
-        self.size = 200,200
-        self.size_hint = 0.5, 0.5
+        self.allow_stretch = True
+        self.size_hint = None, None
+        self.size = (10,10)
+        self.pos_hint = {"top":0.5, "x":0}
 
+
+class MainWindow(Widget):
+    gateCanvas = ObjectProperty(None)
+    andButton = ObjectProperty(None)
+    orButton = ObjectProperty(None)
+    xorButton = ObjectProperty(None)
+    notButton = ObjectProperty(None)
+    Test = "This works?"
+    print(gateCanvas)
 
 kv = Builder.load_file("test.kv")
 

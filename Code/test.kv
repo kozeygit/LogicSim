@@ -1,26 +1,29 @@
 #:kivy 1.0
 #:import Factory kivy.factory.Factory
 
-<ActionButton>
+<ActionButton>:
     font_size:15
     color: 1,1,1,1
     background_normal: ''
     background_color: 0.4,0.4,0.4,1
 
-<GateButton>
-    Button:
-        text: "gate"
-        font_size: 30
-        size_hint: None, None
-        center: self.parent.center
-        on_press: print(root)
-        on_release: root.addGateToCanvas()
+<DragGate>:
+    drag_rectangle: self.x, self.y, self.width, self.height
+    drag_timeout: 10000000
+    drag_distance: 0
 
-<GateLabel@Label>
+<GateButton>:
+    text: "gate"
+    font_size: 30
+    size_hint: None, None
+    center: self.parent.center
+    on_release: app.root.gateCanvas.addGate(root)
+
+<GateLabel@Label>:
     font_size: 30
     color: 0,0,0,1
 
-<ExitPopup>
+<ExitPopup>:
     auto_dismiss: True
     title_color: 0,0,0,1
     title_size: 20
@@ -37,7 +40,7 @@
             on_release: root.closeWindow()
 
 
-<GridLayout>
+<GridLayout>:
     padding: 2
     spacing: 2
     canvas.before:
@@ -47,8 +50,12 @@
             pos: self.pos
             size: self.size
 
-<MainWindow>
-    gateCanvas: gateCanvas
+<MainWindow>:
+    gateCanvas: board
+    andButton: And
+    orButton: Or
+    xorButton: Xor
+    notButton: Not
 
     GridLayout:
         size: root.width, root.height
@@ -85,7 +92,7 @@
             cols: 2
             padding: 0
             GateCanvas:
-                id: gateCanvas
+                id: board
                 canvas.before:
                     Color:
                         rgba: (0.1,0.6,0.6,1)
