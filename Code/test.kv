@@ -1,4 +1,4 @@
-#:kivy 1.0
+#:kivy 2.0
 #:import Factory kivy.factory.Factory
 
 <ActionButton>:
@@ -17,7 +17,6 @@
     font_size: 30
     size_hint: None, None
     center: self.parent.center
-    on_release: app.root.gateCanvas.addGate(root)
 
 <GateLabel@Label>:
     font_size: 30
@@ -51,11 +50,6 @@
             size: self.size
 
 <MainWindow>:
-    gateCanvas: board
-    andButton: And
-    orButton: Or
-    xorButton: Xor
-    notButton: Not
 
     GridLayout:
         size: root.width, root.height
@@ -92,13 +86,25 @@
             cols: 2
             padding: 0
             GateCanvas:
-                id: board
+                id: gateCanvas
+                size_hint: None, None
+                size: 1280 * self.scale, 720 * self.scale
+                do_rotation: False
+                do_translation: False
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                 canvas.before:
                     Color:
-                        rgba: (0.1,0.6,0.6,1)
+                        rgba: (1,1,1,1)
                     Rectangle:
                         pos: self.pos
                         size: self.size
+                    Color:
+                        rgba: (0.1,0.6,0.6,1)
+                    Rectangle:
+                        pos: map(lambda x: x+5, self.pos)
+                        size: map(lambda x: x-10, self.size)
+                    Line:
+                        
             ScrollView:
                 size_hint: None, 1
                 width: 200
@@ -122,29 +128,36 @@
                             text: "And"
                         GateButton:
                             id: And
+                            on_press: root.addGateToCanvas("and")
                         GateLabel:
                             text: "Or"
                         GateButton:
                             id: Or
+                            on_press: root.addGateToCanvas("or")
                         GateLabel:
                             text: "Not"
                         GateButton:
                             id: Not
+                            on_press: root.addGateToCanvas("not")
                         GateLabel:
                             text: "Xor"
                         GateButton:
                             id: Xor
+                            on_press: root.addGateToCanvas("xor")
                         GateLabel:
                             text: "Input"
                         GateButton:
                             id: Input
+                            on_press: root.addGateToCanvas("input")
                         GateLabel:
                             text: "Output"
                         GateButton:
                             id: Output
+                            on_press: root.addGateToCanvas("output")
                         GateLabel:
                             text: "Clock"
                         GateButton:
                             id: Clock
+                            on_press: root.addGateToCanvas("clock")
             
                 

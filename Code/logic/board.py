@@ -1,4 +1,8 @@
-from truth_table import *
+import sys
+print(sys.path)
+from logic.truth_table import *
+
+
 
 class Board:
     ID = 0
@@ -46,7 +50,7 @@ class Board:
         pass
 
     def save(self):
-        
+        pass
 
 class Tree:
     def __init__(self):

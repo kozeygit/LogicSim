@@ -1,5 +1,5 @@
 import time
-from truth_table import *
+from logic.truth_table import *
 
 '''
 Gates Vectors Needed: And, Or, Xor, Not, Switch(on, off), Output(on, off)
@@ -227,10 +227,6 @@ class Output:
         if self._input_node == None:
             self._input_node = gate
             gate.connectNode(-1, self)
-
-    def truthTable(self):
-        return generateTruthTable(self.getExpression())
-
 
     def getOutput(self):
         self._process()
