@@ -1,5 +1,4 @@
-import sys
-print(sys.path)
+from logic.gates import *
 from logic.truth_table import *
 
 
@@ -9,37 +8,33 @@ class Board:
     def __init__(self):
         self.id = Board.ID
         Board.ID += 1
-        self.inputs = []
         self.gates = []
-        self.outputs = []
         self.gateStack = None
         self.visitedGatesInParse = []
     
-    def addGate(self, gate_type, gate):
-        self.gates.append(gate)
+    def addGate(self, *gates):
+        for gate in gates:
+            self.gates.append(gate)
     
-    def removeGate(self, gate_type, gate_id):
-        self.gates.pop(gate_id)
+    def removeGate(self, gate):
+        gate.disconnect
+        self.gates.remove(gate)
     
-    def connectGate(self, gate1_type, gate1_id, gate2_type, gate2_id):
-        gate1 = self.checkWhichListGateIn(gate1_type)[gate1_id]
-        gate2 = self.checkWhichListGateIn(gate2_type)[gate2_id]
+    def connectGate(self, gate1, gate2):
+        if gate1.connectNode(gate2, 1):
+            return True
+        if gate2._type != "not" or gate2._type != "output":
+            if gate1.connectNode(gate2, 2):
+                return True
+        return False
         
     
-    def disconnectGate(self, gate1_id, gate2_id):
-        pass
+    def disconnectGate(self, gate1, gate2):
+        gate1.disconnectNode(gate2)
     
-    def checkWhichListGateIn(self, gate_type):
-        gate_lists = {
-            'gate':self.gates,
-            'input':self.inputs,
-            'output':self.output
-        }
-        gate_type = gate_type.lower()
-        return gate_lists[gate_type]
 
     def getTruthTable(self, gate):
-        pass
+        return generateTruthTable(gate.getExpression())
 
     def clearBoard(self):
         self.inputs = []

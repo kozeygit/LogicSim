@@ -7,16 +7,18 @@
     background_normal: ''
     background_color: 0.4,0.4,0.4,1
 
-<DragGate>:
-    drag_rectangle: self.x, self.y, self.width, self.height
-    drag_timeout: 10000000
-    drag_distance: 0
-
-<GateButton>:
+<GateButton@Button>:
     text: "gate"
     font_size: 30
     size_hint: None, None
     center: self.parent.center
+
+<ToolButton@Button>:
+    text: "Tool"
+    font_size: 10
+    size_hint_y: None
+    size: 50,50
+    pos_hint: {"center_x":0.5}
 
 <GateLabel@Label>:
     font_size: 30
@@ -25,12 +27,11 @@
 <ExitPopup>:
     auto_dismiss: True
     title_color: 0,0,0,1
-    title_size: 20
-    title: "Are you sure you want to quit?"
+    title_size: 18
+    title: "Are you sure you want to quit?\nAny unsaved progress will be lost"
     size_hint: None, None
-    size: 300,150
+    size: 350,150
     BoxLayout:
-        orientaion: "vertical"
         Button:
             text: 'Cancel'
             on_release: root.dismiss()
@@ -83,28 +84,42 @@
         GridLayout:
             size: self.parent.width, self.parent.height
             orientation: "tb-rl"
-            cols: 2
+            cols: 3
             padding: 0
+            GridLayout:
+                orientation: "tb-lr"
+                cols:1
+                size_hint: None, 1
+                width: 50
+                ToolButton:
+                    text: "Connect"
+                    on_press: root.setTool("connect")
+                ToolButton:
+                    text: "Disconnect"
+                    on_press: root.setTool("disconnect")
+                ToolButton:
+                    text: "Move"
+                    on_press: root.setTool("move")
+                ToolButton:
+                    text: "Delete"
+                    on_press: root.deleteGates()
+                ToolButton:
+                    text: "Clear"
+                    on_press: root.clearCanvas()
             GateCanvas:
                 id: gateCanvas
-                size_hint: None, None
-                size: 1280 * self.scale, 720 * self.scale
-                do_rotation: False
-                do_translation: False
-                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
                 canvas.before:
-                    Color:
-                        rgba: (1,1,1,1)
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
                     Color:
                         rgba: (0.1,0.6,0.6,1)
                     Rectangle:
                         pos: map(lambda x: x+5, self.pos)
                         size: map(lambda x: x-10, self.size)
+                canvas.after:
+                    Color:
+                        rgba: (1,0,0,1)
                     Line:
-                        
+                        width: 4
+                        rectangle: (self.x+2, self.y+2, self.width-4, self.height-4)
             ScrollView:
                 size_hint: None, 1
                 width: 200
@@ -159,5 +174,4 @@
                         GateButton:
                             id: Clock
                             on_press: root.addGateToCanvas("clock")
-            
                 

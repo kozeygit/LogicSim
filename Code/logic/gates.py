@@ -73,35 +73,45 @@ class Gate: #Logic gates parent class
 
     def connectNode(self, gate, node=None):
         if node == 1:
-            if self._input_node1 == False:
+            if not self.hasInput(1):
                 self._input_node1 = gate
                 gate.connectNode(-1, self)
                 self.updateExpression()
+                return True
             else:
                 print(f"{self.name}\nConnected to another node already")
+                return False
         elif node == 2:
-            if self._input_node2 == False:
+            if not self.hasInput(2):
                 self._input_node2 = gate
                 gate.connectNode(-1, self)
                 self.updateExpression()
+                return True
             else:
                 print(f"{self.name}\nConnected to another node already")
+                return False
         elif node == -1:
             self._output_nodes.append(gate)
+            return
 
     def disconnectNode(self, gate):
         if self._input_node1 is gate:
             self._input_node1.disconnectNode(self)
             self._input_node1 = False
             self.updateExpression()
+            return True
         elif self._input_node1 is gate:
             self._input_node1.disconnectNode(self)
             self._input_node2 = False
             self.updateExpression()
+            return True
         elif gate in self._output_nodes:
+            gate.disconnectNode(self)
             self._output_nodes.remove(gate)
+            return True
         else:
             print(f"No connection between {self.name} and {gate.getName()}")
+            return False
             
 
 
@@ -152,16 +162,16 @@ class Not_Gate(Gate):
         var1 = self._input_node1.getOutput()
         self._output = self.evaluate(var1)
     
-    def connectNode(self, node, gate):
+    def connectNode(self, gate, node):
         if node == 1:
-            if self._input_node1 == False:
+            if not self.hasInput():
                 self._input_node1 = gate
                 gate.connectNode(-1, self)
                 self.updateExpression()
+                return True
             else:
                 print(f"{self.name}\nConnected to another node already")
-        elif node == -1:
-            self._output_nodes.append(gate)
+                return False
   
     def disconnectNode(self, gate):
         if self._input_node1 is gate:
@@ -170,6 +180,7 @@ class Not_Gate(Gate):
             self.updateExpression()
         elif gate in self._output_nodes:
             self._output_nodes.remove(gate)
+            
 
     def updateExpression(self):
         self._expression = str(f"{self._type}({self._input_node1.getExpression()})")
@@ -184,6 +195,9 @@ class Switch:
         self.id = chr(Switch.ID)
         Switch.ID += 1
         self.name = (f"{self._type}_{self.id}")
+
+    def getName(self):
+        return self.name
     
     def getGateType(self):
         return self._type
@@ -194,7 +208,7 @@ class Switch:
     def getOutput(self):
         return self._output
 
-    def connectNode(self, node, gate):
+    def connectNode(self, gate, node):
         if gate not in self._output_nodes:
             self._output_nodes.append(gate)
 
@@ -210,23 +224,29 @@ class Output:
     def __init__(self):
         self._output = 0
         self._input_node = None
+        self._type = 'output'
         self.id = chr(Output.ID)
         Output.ID += 1
-        self.name = (f"output_{self.id}")
+        self.name = (f"{self._type}_{self.id}")
 
     def _process(self):
         try:
             self._output = self._input_node.getOutput()
-        except AttributeError:
+        except AttributeError as e:
+            print(e)
             self._output = -1
   
     def getExpression(self):
         return self._input_node.getExpression()
 
-    def connectNode(self, gate):
+    def getName(self):
+        return self.name
+
+    def connectNode(self, gate, node):
         if self._input_node == None:
             self._input_node = gate
             gate.connectNode(-1, self)
+
 
     def getOutput(self):
         self._process()
