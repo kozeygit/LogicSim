@@ -1,5 +1,3 @@
-import time
-from logic.truth_table import *
 
 '''
 Gates Vectors Needed: And, Or, Xor, Not, Switch(on, off), Output(on, off)
@@ -8,73 +6,31 @@ Gates Vectors Needed: And, Or, Xor, Not, Switch(on, off), Output(on, off)
 class Gate: #Logic gates parent class
     ID = 0
     def __init__(self):
-        self._input_node1 = False
-        self._input_node2 = False
+        self._input_nodes = [None, None]
         self._output_nodes = []
         self._output = 0
         self._type = ''
         self._expression = None
-        
+        self.name = ''
         self.id = Gate.ID
         Gate.ID += 1
 
+    def evaluate(self):
+        pass
+    
     # Returns True if node given is empty, or if no node is given, returns True if both are empty. 
     def hasInput(self, node=0):
         if node == 0:
-            return self._input_node1 and self._input_node2
+            return self._input_nodes[0] and self._input_nodes[1]
         elif node == 1:
-            return self._input_node1 and True
+            return bool(self._input_nodes[0])
         elif node == 2:
-            return self._input_node2 and True
-    
-    def evaluate(self):
-        return
+            return bool(self._input_nodes[1])
 
-    def updateExpression(self):
-        if self.hasInput():
-            if self._input_node1.getGateType() == 'switch':
-                exp1 = self._input_node1.getExpression()
-            else:
-                exp1 = f"({self._input_node1.getExpression()})"
-                
-            if self._input_node2.getGateType() == 'switch':
-                exp2 = self._input_node2.getExpression()
-            else:
-                exp2 = f"({self._input_node2.getExpression()})"
-            
-            self._expression = f"{exp1} {self._type} {exp2}"
-        else:
-            self._expression = None
-
-    def getExpression(self):
-        return self._expression
-
-
-  # Rewrite, doesnt handle flip flop recursion
-    def _process(self):
-        if self.hasInput():
-            var1 = self._input_node1.getOutput()
-            var2 = self._input_node2.getOutput()
-            self._output = self.evaluate(var1, var2)
-        else:
-            print("Gate is missing input(s)")
-            print(self._input_node1)
-            print(self._input_node2)
-
-    def getGateType(self):
-        return self._type
-
-    def getOutput(self):
-        self._process()
-        return self._output
-
-    def getName(self):
-        return self.name
-
-    def connectNode(self, gate, node=None):
+    def connectNode(self, gate, node):
         if node == 1:
             if not self.hasInput(1):
-                self._input_node1 = gate
+                self._input_nodes[0] = gate
                 gate.connectNode(-1, self)
                 self.updateExpression()
                 return True
@@ -83,7 +39,7 @@ class Gate: #Logic gates parent class
                 return False
         elif node == 2:
             if not self.hasInput(2):
-                self._input_node2 = gate
+                self._input_nodes[1] = gate
                 gate.connectNode(-1, self)
                 self.updateExpression()
                 return True
@@ -95,14 +51,14 @@ class Gate: #Logic gates parent class
             return
 
     def disconnectNode(self, gate):
-        if self._input_node1 is gate:
-            self._input_node1.disconnectNode(self)
-            self._input_node1 = False
+        if self._input_nodes[0] is gate:
+            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0] = False
             self.updateExpression()
             return True
-        elif self._input_node1 is gate:
-            self._input_node1.disconnectNode(self)
-            self._input_node2 = False
+        elif self._input_nodes[1] is gate:
+            self._input_nodes[1].disconnectNode(self)
+            self._input_nodes[1] = False
             self.updateExpression()
             return True
         elif gate in self._output_nodes:
@@ -112,7 +68,61 @@ class Gate: #Logic gates parent class
         else:
             print(f"No connection between {self.name} and {gate.getName()}")
             return False
+
+    def disconnectAll(self): # Use when deleting gate
+        if self._input_nodes[0] != None:
+            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0] = False
+            self.updateExpression()
+            return True
+        if self._input_nodes[1] != None:
+            self._input_nodes[1].disconnectNode(self)
+            self._input_nodes[1] = False
+            self.updateExpression()
+            return True
+        for i in self._output_nodes:
+            i.disconnectNode(self)
+    
+  # doesnt handle flip flop recursion
+    def _process(self):
+        if self.hasInput():
+            var1 = self._input_nodes[0].getOutput()
+            var2 = self._input_nodes[1].getOutput()
+            self._output = self.evaluate(var1, var2)
+        else:
+            print("Gate is missing input(s)")
+            print(self._input_nodes[0])
+            print(self._input_nodes[1])
+    
+    def updateExpression(self):
+        if self.hasInput():
+            if self._input_nodes[0].getGateType() == 'switch':
+                exp1 = self._input_nodes[0].getExpression()
+            else:
+                exp1 = f"({self._input_nodes[0].getExpression()})"
+                
+            if self._input_nodes[1].getGateType() == 'switch':
+                exp2 = self._input_nodes[1].getExpression()
+            else:
+                exp2 = f"({self._input_nodes[1].getExpression()})"
             
+            self._expression = f"{exp1} {self._type} {exp2}"
+        else:
+            self._expression = None
+
+    def getExpression(self):
+        return self._expression
+
+    def getGateType(self):
+        return self._type
+
+    def getOutput(self):
+        self._process()
+        return self._output
+
+    def getName(self):
+        return self.name
+
 
 
 
@@ -122,7 +132,6 @@ class And_Gate(Gate):
         self._type = 'and'
         self.name = f"{self._type}_{str(self.id)}"
         
-
     def evaluate(self, var1, var2):
         return (var1 and var2)
 
@@ -152,20 +161,20 @@ class Not_Gate(Gate):
         self.name = f"{self._type}_{str(self.id)}"
 
     def hasInput(self):
-        return self._input_node1
+        return bool(self._input_nodes[0])
 
     def evaluate(self, var1):
         return int((not var1))
 
   # Rewrite, doesnt handle flip flop recursion
     def _process(self):
-        var1 = self._input_node1.getOutput()
+        var1 = self._input_nodes[0].getOutput()
         self._output = self.evaluate(var1)
     
     def connectNode(self, gate, node):
         if node == 1:
             if not self.hasInput():
-                self._input_node1 = gate
+                self._input_nodes[0] = gate
                 gate.connectNode(-1, self)
                 self.updateExpression()
                 return True
@@ -174,16 +183,22 @@ class Not_Gate(Gate):
                 return False
   
     def disconnectNode(self, gate):
-        if self._input_node1 is gate:
-            self._input_node1.disconnectNode(self)
-            self._input_node1 = False
+        if self._input_nodes[0] is gate:
+            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0] = False
             self.updateExpression()
         elif gate in self._output_nodes:
             self._output_nodes.remove(gate)
-            
+
+    def disconnectAll(self): # Use when deleting gate
+        if not self._input_nodes[0] == None:
+            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0] = False
+            self.updateExpression()
+            return True     
 
     def updateExpression(self):
-        self._expression = str(f"{self._type}({self._input_node1.getExpression()})")
+        self._expression = str(f"{self._type}({self._input_nodes[0].getExpression()})")
 
 
 class Switch:
@@ -195,6 +210,21 @@ class Switch:
         self.id = chr(Switch.ID)
         Switch.ID += 1
         self.name = (f"{self._type}_{self.id}")
+ 
+    def connectNode(self, gate, node):
+        if gate not in self._output_nodes:
+            self._output_nodes.append(gate)
+
+    def disconnectNode(self, gate):
+        if gate in self._output_nodes:
+            self._output_nodes.remove(gate)
+
+    def disconnectAll(self):
+        for gate in self._output_nodes:
+            gate.disconnectNode(self)
+
+    def flip(self):
+        self._output = int(not(self.output))
 
     def getName(self):
         return self.name
@@ -208,22 +238,11 @@ class Switch:
     def getOutput(self):
         return self._output
 
-    def connectNode(self, gate, node):
-        if gate not in self._output_nodes:
-            self._output_nodes.append(gate)
-
-    def disconnectNode(self, gate):
-        if gate in self._output_nodes:
-            self._output_nodes.remove(gate)
-
-    def flip(self):
-        self._output = self._output ^ 1
-
 class Output:
     ID = 65
     def __init__(self):
-        self._output = 0
-        self._input_node = None
+        self._output = -1
+        self._input_nodes = [None]
         self._type = 'output'
         self.id = chr(Output.ID)
         Output.ID += 1
@@ -234,51 +253,30 @@ class Output:
             self._output = self._input_node.getOutput()
         except AttributeError as e:
             print(e)
-            self._output = -1
+            self._output = None
   
+    def connectNode(self, gate, node):
+        if self._input_nodes[0] == None:
+            self._input_nodes[0] = gate
+            gate.connectNode(self, -1)
+        else:
+            print("Node already connected to" + self._input_nodes[0])
+
+    def disconnectNode(self, gate):
+        if self.input_nodes[0] is gate:
+            self.input_nodes[0] = None
+            gate.disconnectNode(self)
+
     def getExpression(self):
         return self._input_node.getExpression()
 
     def getName(self):
         return self.name
 
-    def connectNode(self, gate, node):
-        if self._input_node == None:
-            self._input_node = gate
-            gate.connectNode(-1, self)
-
+    def getGateType(self):
+        return self._type
 
     def getOutput(self):
         self._process()
         return self._output
 
-    def printOutput(self):
-        out = self.getOutput()
-        if out == -1:
-            print("No Output; Incorrect Input")
-        else:
-            print(out)
-
-
-class Clock:
-    def __init__(self):
-        self.time = time.time
-        self.state = 0
-        self.start_time = self.time()
-        self.numTicks = 0
-
-    def getOutput(self):
-        return self.state
-    
-    def change_state(self):
-        self.state = (self.state + 1) % 2
-
-    def connectNode(self, *args):
-        pass
-
-
-    def tick(self, FPS):
-        if (self.time() - self.start_time) >= (1/FPS):
-            self.start_time = self.time()
-            self.numTicks += 1
-            self.change_state()

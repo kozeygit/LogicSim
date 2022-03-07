@@ -2,78 +2,71 @@ from itertools import permutations
 from os import system as sys
 
 # executes the boolean expression
-def do(exp, d, n):
-    new_d = d
-    perm = []
-    for i in range(n):
-        x = exp
-        for ii in d:
-            x = x.replace(ii, str(d[ii][i]))
-            #print(x)
-            #print(d)
-        end = eval(x)
-        perm.append(end)
-    new_d['OUT'] = perm
-    #print(new_d)
-    return new_d
+def getOutputs(expression, dictionary, num_permutations):
+    truth_dictionary = dictionary
+    list_of_outputs = []
+    for i in range(num_permutations):
+        expression_with_variables = expression
+        for variable in truth_dictionary:
+            expression_with_variables = expression_with_variables.replace(variable, str(dictionary[variable][i]))
+        output = eval(expression_with_variables)
+        list_of_outputs.append(output)
+    truth_dictionary['OUT'] = list_of_outputs
+    return truth_dictionary
 
 
 def generateTruthTable(expression):
   
-    # string manipulation to replace words with operators that can be executed
-    exp = expression.lower()
-    exp = exp.replace("not ", "2+~ ")
-    exp = exp.replace("not", "2+~ ")
-    exp = exp.replace("and", "&")
-    exp = exp.replace("xor", "^")
-    exp = exp.replace("or", "|")
+    # string manipulation to replace words with operators that python can evaluate
+    # making words operators also help when finding variables
+    input_expression = expression
+    expression = expression.lower()
+    expression = expression.replace("not ", "2+~ ")
+    expression = expression.replace("not", "2+~ ")
+    expression = expression.replace("and", "&")
+    expression = expression.replace("xor", "^")
+    expression = expression.replace("or", "|")
     
     operators = ["2+~", "&", "^", "|", "(", ")"]
     variables = []
 
-    # gets list of variables in expression
-    temp_exp = exp.replace("(", "").replace(")", "")
+    # gets list of the differnt variables in the expression
+    temp_exp = expression.replace("(", "").replace(")", "")
     for i in temp_exp.split(" "):
         if i not in operators and i not in variables:
-            #print(i)
             variables.append(i)
+    num_variables = len(variables)
 
-    no_variables = len(variables)
-
-    # gets a list of 
-    temp = [0 for i in range(no_variables)] + [1 for i in range(no_variables)]
-    p = permutations(temp, no_variables)
-    perm = []
+    # gets a list of permutations based on the number of variables, also removes repeats
+    temp = [0 for i in range(num_variables)] + [1 for i in range(num_variables)]
+    p = permutations(temp, num_variables)
+    variable_permutations = []
     for i in p:
-        if i not in perm:
-            perm.append(i)
-    #print(perm)
+        if i not in variable_permutations:
+            variable_permutations.append(i)
 
-    v = dict()
+
+    dictionary = dict()
     for i,j in enumerate(variables):
-        v[j] = [ii[i] for ii in perm]
-    #print(v)
+        dictionary[j] = [ii[i] for ii in variable_permutations]
 
-    final = do(exp, v, len(perm))
+    final_dictionary = getOutputs(expression, dictionary, len(variable_permutations))
 
-    fs = ''
-    fs = fs + str("Boolean Expression: " + expression.upper() + "\n")
-    for i in final:
+    final_string = ''
+    final_string = final_string + str("Boolean Expression: " + input_expression.upper() + "\n")
+    for i in final_dictionary:
         if i.lower() == 'out':
-            fs = fs + (f"|{i}")
+            final_string = final_string + (f"|{i}")
         else:
-            fs = fs + (f"| {i} ")
-    fs = fs + ('|\n')
-    for i in range(len(perm)):
-        for ii in final:
-            fs = fs + (f"| {final[ii][i]} ")
-        fs = fs + ('|\n')
+            final_string = final_string + (f"| {i} ")
+    final_string = final_string + ('|\n')
+    for i in range(len(variable_permutations)):
+        for ii in final_dictionary:
+            final_string = final_string + (f"| {final_dictionary[ii][i]} ")
+        final_string = final_string + ('|\n')
 
-    #printTruthTable(fs)
-    return fs
+    return final_string
 
-def printTruthTable(truth_table_string):
-    print(truth_table_string)
 
 if __name__ == '__main__':
     sys('clear')

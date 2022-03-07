@@ -1,2 +1,4 @@
 https://stackoverflow.com/questions/25273046/using-and-moving-widgets-buttons-in-kivy?rq=1
 
+https://blog.kivy.org/2019/06/widget-interactions-between-python-and-kv/ 
+

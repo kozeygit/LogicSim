@@ -17,9 +17,11 @@ from kivy.uix.popup import Popup
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
 from logic.board import Board
 from logic.gates import *
+
 
 
 class ExitPopup(Popup):
@@ -44,7 +46,7 @@ class GateCanvas(FloatLayout):
             "clock":None
         }
     
-    def on_touch_down_connect(self, touch):
+    def connect(self, touch):
         #if the touch is not for me, and if i don't want to use it, avoid it.
         for child in self.children[:]:
             child.deselect()
@@ -58,7 +60,6 @@ class GateCanvas(FloatLayout):
         #if the touch is not for me, and if i don't want to use it, avoid it.
         for child in self.children[:]:
             if child.dispatch('on_touch_down', touch):
-                child.select()
                 return True
         if not self.collide_point(*touch.pos):
             return
@@ -67,7 +68,7 @@ class GateCanvas(FloatLayout):
 
     def on_touch_down(self, touch):
         if self.tool == "connect":
-            pass
+            self.connect(touch)
         if self.tool == "disconect":
             pass
         if self.tool == "move":
@@ -108,8 +109,8 @@ class DragGate(DragBehavior, FloatLayout):
         self.root = None
         self.nodes = []
         self.drag_rectangle = parent_rect
-        self.drag_timeout = 1000000
-        self.drag_distance = 0
+        self.drag_timeout = 500
+        self.drag_distance = 5
         self.logic_gate = None
         self.allow_stretch = True
         self.size_hint = None, None
@@ -120,6 +121,8 @@ class DragGate(DragBehavior, FloatLayout):
         self.border = Line(rounded_rectangle = (self.x, self.y, self.width, self.height, 10))
         self.canvas.add(self.border)
         self.select()
+        self.dragged = False
+        print(self.parent)
 
     def isSelected(self):
         return self.selected
@@ -142,27 +145,40 @@ class DragGate(DragBehavior, FloatLayout):
         self.border.width = 0.0001
     
     def on_touch_down(self, touch):
-        if not self.collide_point(*touch.pos):
-            return super().on_touch_down(touch)
-        if self.selected:
-            return super().on_touch_down(touch)
-        else:
-            self.select()
-            return True
+        if self.collide_point(*touch.pos):
+            self.dragged = False
+        return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
-        if not self.collide_point(*touch.pos):
-            return
-        super().on_touch_move(touch)
+        if touch.grab_current is not self:
+            return super().on_touch_move(touch)
+        self.select()
+        self.dragged = True
         self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)
         self.img.pos = self.pos
-        if self.x < self.parent.x or\
-        self.y < self.parent.y or\
-        self.x + self.width > self.parent.x +  self.parent.width or\
-        self.y + self.height > self.parent.y +  self.parent.height:
-            self
-            print("AHHHH")
-        return True
+        if self.x < self.parent.x:
+            self.x = self.parent.x
+        elif self.y < self.parent.y:
+            self.y = self.parent.y
+        elif self.x + self.width > self.parent.x +  self.parent.width:
+            self.x = self.parent.x + self.parent.width - self.width
+        elif self.y + self.height > self.parent.y +  self.parent.height:
+            self.y = self.parent.y + self.parent.height - self.height
+        else:
+            print(self.pos)
+        super().on_touch_move(touch)
+
+    def on_touch_up(self, touch):
+        if not self.collide_point(*touch.pos):
+            return super().on_touch_up(touch)
+        if self.dragged:
+            self.deselect()
+        elif self.selected:
+            self.deselect()
+        else:
+            self.select()
+
+        return super().on_touch_up(touch)
 
     def getLogicGate(self):
         return self.logic_gate
@@ -173,18 +189,23 @@ class DragSwitch(DragGate):
         self.logic_gate = Switch()
         self.states = {1:"Images/GateIcons/switch_on.png", 0:"Images/GateIcons/switch_off.png"}
         self.img.source = self.states[self.logic_gate.getOutput()]
+        self.button = ToggleButton(pos=self.pos)
+        self.add_widget(self.button)
+
 
     def on_touch_down(self, touch):
-        if not self.collide_point(*touch.pos):
-            return super().on_touch_down(touch)
-        if self.selected:
+        if self.collide_point(*touch.pos):
+            self.dragged = False
+        return super().on_touch_down(touch)
+
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
             self.logic_gate.flip()
             self.img.source = self.states[self.logic_gate.getOutput()]
+        elif self.collide_point(*touch.pos):
+            self.dragged = False
             print(self.logic_gate.getOutput())
-            return super().on_touch_down(touch)
-        else:
-            self.select()
-            return True
+        return super().on_touch_down(touch)
 
 
 class DragAndGate(DragGate):
