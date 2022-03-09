@@ -2,33 +2,6 @@ from logic.gates import *
 from logic.board import *
 import random
 import os
-# import ui
-
-
-
-# class Queue:
-#   def __init__(self, *args):
-#     self.q = list(args)
-
-# s1 = Switch()
-# s2 = Switch()
-# o1 = Or_Gate()
-# o2 = Or_Gate()
-# n1 = Not_Gate()
-# n2 = Not_Gate()
-# out = Output()
-
-
-# o1.connectNode(1, s1)
-# o1.connectNode(2, s2)
-# s1.flip()
-# out.connectNode(o1)
-# out.printOutput()
-
-
-# class Simulation():
-#     def __init__(self):
-#         self.board = Board
 
 
 s1 = Switch()
@@ -58,3 +31,7 @@ print(o1.getExpression())
 print("8")#
 b.disconnectGate(or1,s1)
 print(b.getTruthTable(o1))
+print(b.gates)
+b.clearBoard()
+print("~~~~~~~~~~~~~~~~~~~~")
+print(b.gates)

@@ -50,8 +50,8 @@ class GateCanvas(FloatLayout):
         #if the touch is not for me, and if i don't want to use it, avoid it.
         for child in self.children[:]:
             child.deselect()
-        for child in self.children[:]:
-            print(child if child.isSelected() else "")
+        #for child in self.children[:]:
+            #print(child if child.isSelected() else "")
         if not self.collide_point(*touch.pos):
             return
         return True
@@ -87,7 +87,7 @@ class GateCanvas(FloatLayout):
         self.add_widget(newGate)
         newGate.root = self.root
         self.board.addGate(newGate.getLogicGate())
-        print(self.board.gates)
+        #print(self.board.gates)
 
     def deleteGates(self):
         if not self.tool == "move":
@@ -100,7 +100,7 @@ class GateCanvas(FloatLayout):
     def clearCanvas(self):
         self.board.clearBoard()
         self.clear_widgets()
-        print(self.board.gates)
+        #print(self.board.gates)
 
 
 class DragGate(DragBehavior, FloatLayout):
@@ -122,7 +122,7 @@ class DragGate(DragBehavior, FloatLayout):
         self.canvas.add(self.border)
         self.select()
         self.dragged = False
-        print(self.parent)
+        #print(self.parent)
 
     def isSelected(self):
         return self.selected
@@ -138,7 +138,7 @@ class DragGate(DragBehavior, FloatLayout):
     def select(self):
         self.selected = True
         self.border.width = 2
-        print(self.root)
+        #print(self.root)
 
     def deselect(self):
         self.selected = False
@@ -160,13 +160,14 @@ class DragGate(DragBehavior, FloatLayout):
             self.x = self.parent.x
         elif self.y < self.parent.y:
             self.y = self.parent.y
-        elif self.x + self.width > self.parent.x +  self.parent.width:
-            self.x = self.parent.x + self.parent.width - self.width
-        elif self.y + self.height > self.parent.y +  self.parent.height:
-            self.y = self.parent.y + self.parent.height - self.height
+        elif self.right > self.parent.right:
+            self.right = self.parent.right
+        elif self.top > self.parent.top:
+            self.top = self.parent.top
         else:
-            print(self.pos)
-        super().on_touch_move(touch)
+            #print(self.pos)
+            pass
+        return super().on_touch_move(touch)
 
     def on_touch_up(self, touch):
         if not self.collide_point(*touch.pos):
@@ -204,7 +205,7 @@ class DragSwitch(DragGate):
             self.img.source = self.states[self.logic_gate.getOutput()]
         elif self.collide_point(*touch.pos):
             self.dragged = False
-            print(self.logic_gate.getOutput())
+            #print(self.logic_gate.getOutput())
         return super().on_touch_down(touch)
 
 

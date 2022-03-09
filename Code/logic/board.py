@@ -31,5 +31,6 @@ class Board:
         return generateTruthTable(gate.getExpression())
 
     def clearBoard(self):
-        for i in self.gates:
+        for i in self.gates[:]:
+            print(len(self.gates))
             self.removeGate(i)
