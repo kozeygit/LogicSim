@@ -33,7 +33,6 @@ class ExitPopup(Popup):
 class GateCanvas(FloatLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.root = None
         self.tool = "move"
         self.board = Board()
         self.gate_dict = {
@@ -45,16 +44,19 @@ class GateCanvas(FloatLayout):
             "output":None,
             "clock":None
         }
+
+    def setTool(self, tool):
+        self.tool = tool
     
     def connect(self, touch):
-        #if the touch is not for me, and if i don't want to use it, avoid it.
+        self.deselectChildren()
         for child in self.children[:]:
-            child.deselect()
-        #for child in self.children[:]:
-            #print(child if child.isSelected() else "")
-        if not self.collide_point(*touch.pos):
-            return
-        return True
+            if child.collide_point(*touch.pos):
+                child.select()
+                return True
+        if self.collide_point(*touch.pos):
+            return True
+        return False
 
     def move(self, touch):
         #if the touch is not for me, and if i don't want to use it, avoid it.
@@ -62,17 +64,35 @@ class GateCanvas(FloatLayout):
             if child.dispatch('on_touch_down', touch):
                 return True
         if not self.collide_point(*touch.pos):
-            return
+            return False
         self.deselectChildren()
         return True
 
     def on_touch_down(self, touch):
         if self.tool == "connect":
-            self.connect(touch)
+            return self.connect(touch)
         if self.tool == "disconect":
             pass
         if self.tool == "move":
             return self.move(touch)
+
+    def on_touch_up(self, touch):
+        if self.tool == "connect":
+            if self.collide_point(*touch.pos):
+                for child in self.children[:]:
+                    if child.collide_point(*touch.pos):
+                        if child not in self.getSelectedChildren():
+                            child.select()
+                            print(len(self.getSelectedChildren()))
+                            return True
+                        else:
+                            self.deselectChildren()
+        if self.tool == "disconect":
+            pass
+        if self.tool == "move":
+            return super().on_touch_up(touch)
+        print(self.getSelectedChildren())
+        #return super().on_touch_up(touch)
    
 
     def getSelectedChildren(self):
@@ -242,13 +262,15 @@ class MainWindow(Widget):
         self.ids["gateCanvas"].root = self
 
     def setTool(self, tool):
-        self.ids["gateCanvas"].tool = tool
+        self.ids["gateCanvas"].setTool(tool)
+        self.ids["toolLabel"].text = tool
     
     def clearCanvas(self):
         self.ids["gateCanvas"].clearCanvas()
 
     def deleteGates(self):
         self.ids["gateCanvas"].deleteGates()
+        self.ids["toolLabel"].text = 'move'
 
     def addGateToCanvas(self, gate_type):
         self.ids["gateCanvas"].addGate(gate_type)

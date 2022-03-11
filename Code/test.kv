@@ -106,6 +106,9 @@
                 ToolButton:
                     text: "Clear"
                     on_press: root.clearCanvas()
+                Label:
+                    id: toolLabel
+                    text: gateCanvas.tool
             GateCanvas:
                 id: gateCanvas
                 canvas.before:
