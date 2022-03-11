@@ -2,7 +2,7 @@ from itertools import permutations
 from os import system as sys
 
 # executes the boolean expression
-def getOutputs(expression, dictionary, num_permutations):
+def getTruthTableOutputs(expression, dictionary, num_permutations):
     truth_dictionary = dictionary
     list_of_outputs = []
     for i in range(num_permutations):
@@ -50,7 +50,7 @@ def generateTruthTable(expression):
     for i,j in enumerate(variables):
         dictionary[j] = [ii[i] for ii in variable_permutations]
 
-    final_dictionary = getOutputs(expression, dictionary, len(variable_permutations))
+    final_dictionary = getTruthTableOutputs(expression, dictionary, len(variable_permutations))
 
     final_string = ''
     final_string = final_string + str("Boolean Expression: " + input_expression.upper() + "\n")

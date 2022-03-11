@@ -25,7 +25,7 @@ class Board:
         return False
         
     def disconnectGate(self, gate1, gate2):
-        gate1.disconnectNode(gate2)
+        return gate1.disconnectNode(gate2)
     
     def getTruthTable(self, gate):
         return generateTruthTable(gate.getExpression())

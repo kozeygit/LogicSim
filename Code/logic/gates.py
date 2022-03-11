@@ -8,7 +8,7 @@ class Gate: #Logic gates parent class
     def __init__(self):
         self._input_nodes = [None, None]
         self._output_nodes = []
-        self._output = 0
+        self._output = 0 
         self._type = ''
         self._expression = None
         self.name = ''
@@ -73,14 +73,13 @@ class Gate: #Logic gates parent class
             self._input_nodes[0].disconnectNode(self)
             self._input_nodes[0] = None
             self.updateExpression()
-            return True
         if self._input_nodes[1] != None:
             self._input_nodes[1].disconnectNode(self)
             self._input_nodes[1] = None
             self.updateExpression()
-            return True
         for i in self._output_nodes:
             i.disconnectNode(self)
+        
     
   # doesnt handle flip flop recursion
     def _process(self):
@@ -186,15 +185,19 @@ class Not_Gate(Gate):
             self._input_nodes[0].disconnectNode(self)
             self._input_nodes[0] = None
             self.updateExpression()
+            return True
         elif gate in self._output_nodes:
             self._output_nodes.remove(gate)
+            return True
+        else:
+            print(f"No connection between {self.name} and {gate.getName()}")
+            return False
 
     def disconnectAll(self): # Use when deleting gate
         if not self._input_nodes[0] == None:
             self._input_nodes[0].disconnectNode(self)
             self._input_nodes[0] = None
             self.updateExpression()
-            return True     
 
     def updateExpression(self):
         if self.hasInput():
@@ -218,20 +221,23 @@ class Switch:
         self.name = (f"{self._type}_{self.id}")
  
     def connectNode(self, gate, node):
-        print(">>>>>>>>>>>>>>>>", gate, node)
         if gate not in self._output_nodes:
             self._output_nodes.append(gate)
+            return True
+        return False
 
     def disconnectNode(self, gate):
         if gate in self._output_nodes:
             self._output_nodes.remove(gate)
+            return True
+        return False
 
     def disconnectAll(self):
         for gate in self._output_nodes:
             gate.disconnectNode(self)
 
     def flip(self):
-        self._output = int(not(self.output))
+        self._output = int(not(self._output))
 
     def getName(self):
         return self.name
@@ -266,13 +272,17 @@ class Output:
         if self._input_nodes[0] == None:
             self._input_nodes[0] = gate
             gate.connectNode(self, -1)
+            return True
         else:
             print("Node already connected to", self._input_nodes[0])
+            return False
 
     def disconnectNode(self, gate):
         if self._input_nodes[0] is gate:
             self._input_nodes[0] = None
             gate.disconnectNode(self)
+            return True
+        return False
 
     def disconnectAll(self):
         for gate in self._input_nodes:
