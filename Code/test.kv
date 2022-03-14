@@ -13,8 +13,13 @@
     size_hint: None, None
     center: self.parent.center
 
+<ToolToggleButton@ToggleButton>:
+    font_size: 10
+    size_hint_y: None
+    size: 50,50
+    pos_hint: {"center_x":0.5}
+
 <ToolButton@Button>:
-    text: "Tool"
     font_size: 10
     size_hint_y: None
     size: 50,50
@@ -91,13 +96,20 @@
                 cols:1
                 size_hint: None, 1
                 width: 50
-                ToolButton:
+                ToolToggleButton:
+                    id: connectToggle
+                    group: "tools"
                     text: "Connect"
                     on_press: root.setTool("connect")
-                ToolButton:
+                ToolToggleButton:
+                    id: disconnectToggle
+                    group: "tools"
                     text: "Disconnect"
                     on_press: root.setTool("disconnect")
-                ToolButton:
+                ToolToggleButton:
+                    id: moveToggle
+                    state: "down"
+                    group: "tools"
                     text: "Move"
                     on_press: root.setTool("move")
                 ToolButton:

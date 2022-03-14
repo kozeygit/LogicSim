@@ -285,8 +285,7 @@ class Output:
         return False
 
     def disconnectAll(self):
-        for gate in self._input_nodes:
-            gate.disconnectNode(self)
+        pass
 
     def getExpression(self):
         return self._input_nodes[0].getExpression()

@@ -22,12 +22,14 @@ from kivy.uix.widget import Widget
 from logic.board import Board
 from logic.gates import *
 
-
+Window.maximize()
 
 class ExitPopup(Popup):
     def closeWindow(self):
         sys.exit()
 
+class ConnectionLine:
+    pass
 
 
 class GateCanvas(FloatLayout):
@@ -41,7 +43,7 @@ class GateCanvas(FloatLayout):
             "not":DragNotGate,
             "xor":DragXorGate,
             "input":DragSwitch,
-            "output":None,
+            "output":DragOutput,
             "clock":None
         }
 
@@ -58,6 +60,8 @@ class GateCanvas(FloatLayout):
             return True
         return False
 
+    
+
     def move(self, touch):
         #if the touch is not for me, and if i don't want to use it, avoid it.
         for child in self.children[:]:
@@ -69,6 +73,9 @@ class GateCanvas(FloatLayout):
         return True
 
     def on_touch_down(self, touch):
+        
+        print(self.board.gates)
+        
         if self.tool == "connect":
             return self.connect(touch)
         if self.tool == "disconect":
@@ -84,6 +91,8 @@ class GateCanvas(FloatLayout):
                         if child not in self.getSelectedChildren():
                             child.select()
                             print(len(self.getSelectedChildren()))
+                            self.board.connectGate(self.getSelectedChildren()[1].getLogicGate(), self.getSelectedChildren()[0].getLogicGate())
+                            (i.update_state() for i in self.children[:])
                             return True
                         else:
                             self.deselectChildren()
@@ -210,23 +219,28 @@ class DragSwitch(DragGate):
         self.logic_gate = Switch()
         self.states = {1:"Images/GateIcons/switch_on.png", 0:"Images/GateIcons/switch_off.png"}
         self.img.source = self.states[self.logic_gate.getOutput()]
-        self.button = ToggleButton(pos=self.pos)
-        self.add_widget(self.button)
-
-
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            self.dragged = False
-        return super().on_touch_down(touch)
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
             self.logic_gate.flip()
-            self.img.source = self.states[self.logic_gate.getOutput()]
+            self.update_state()
         elif self.collide_point(*touch.pos):
             self.dragged = False
             #print(self.logic_gate.getOutput())
         return super().on_touch_down(touch)
+
+    def update_state(self):
+        self.img.source = self.states[self.logic_gate.getOutput()]
+
+class DragOutput(DragGate):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.logic_gate = Output()
+        self.states = {1:"Images/GateIcons/output_on.png", 0:"Images/GateIcons/output_off.png", None:"Images/GateIcons/output_empty.png"}
+        self.img.source = self.states[self.logic_gate.getOutput()]
+
+    def update_state(self):
+        self.img.source = self.states[self.logic_gate.getOutput()]
 
 
 class DragAndGate(DragGate):
@@ -234,8 +248,6 @@ class DragAndGate(DragGate):
         super().__init__(**kwargs)
         self.img.source = "Images/GateIcons/and.png"
         self.logic_gate = And_Gate()
-        self.nodes
-
 
 class DragOrGate(DragGate):
     def __init__(self, **kwargs):
@@ -256,6 +268,8 @@ class DragNotGate(DragGate):
         self.logic_gate = Not_Gate()
 
 
+    
+
 class MainWindow(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -271,6 +285,9 @@ class MainWindow(Widget):
     def deleteGates(self):
         self.ids["gateCanvas"].deleteGates()
         self.ids["toolLabel"].text = 'move'
+        self.ids["connectToggle"].state = "normal"
+        self.ids["disconnectToggle"].state = "normal"
+        self.ids["moveToggle"].state = "down"
 
     def addGateToCanvas(self, gate_type):
         self.ids["gateCanvas"].addGate(gate_type)
