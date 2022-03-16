@@ -18,11 +18,11 @@ class Board:
     
     def connectGate(self, gate1, gate2):
         if gate1.connectNode(gate2, 1):
-            return True
+            return 1
         if gate2.getGateType() != "not" or gate2.getGateType() != "output":
             if gate1.connectNode(gate2, 2):
-                return True
-        return False
+                return 2
+        return 0
         
     def disconnectGate(self, gate1, gate2):
         return gate1.disconnectNode(gate2)

@@ -28,6 +28,9 @@ class Gate: #Logic gates parent class
             return bool(self._input_nodes[1])
 
     def connectNode(self, gate, node):
+        if gate in self._input_nodes:
+            print("Gate connected to me already")
+            return False
         if node == 1:
             if not self.hasInput(1):
                 self._input_nodes[0] = gate
@@ -35,7 +38,7 @@ class Gate: #Logic gates parent class
                 self.updateExpression()
                 return True
             else:
-                print(f"{self.name}\nConnected to another node already")
+                print(f"{self.name}\n node 1 Connected to another gate already")
                 return False
         elif node == 2:
             if not self.hasInput(2):
@@ -44,7 +47,7 @@ class Gate: #Logic gates parent class
                 self.updateExpression()
                 return True
             else:
-                print(f"{self.name}\nConnected to another node already")
+                print(f"{self.name}\n node 2 Connected to another gate already")
                 return False
         elif node == -1:
             self._output_nodes.append(gate)
@@ -238,6 +241,7 @@ class Switch:
 
     def flip(self):
         self._output = int(not(self._output))
+        print(self._output_nodes)
 
     def getName(self):
         return self.name
@@ -265,7 +269,7 @@ class Output:
         try:
             self._output = self._input_nodes[0].getOutput()
         except AttributeError as e:
-            print(e)
+            print(e, len(self._input_nodes))
             self._output = None
   
     def connectNode(self, gate, node):
