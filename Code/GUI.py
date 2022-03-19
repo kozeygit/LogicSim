@@ -234,6 +234,7 @@ class DragSwitch(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.logic_gate = Switch()
+        toggle = None #Add toggle here
         self.canvas.add(toggle)
         self.states = {1:"Images/GateIcons/switch_on.png", 0:"Images/GateIcons/switch_off.png"}
         self.img.source = self.states[self.logic_gate.getOutput()]
