@@ -17,7 +17,6 @@
     font_size: 10
     size_hint_y: None
     size: 50,50
-    color: 0.4,0.4,0.4,1
     pos_hint: {"center_x":0.5}
     allow_no_selection: False
 
@@ -98,23 +97,22 @@
                 cols:1
                 size_hint: None, 1
                 width: 50
-                
-                    ToolToggleButton:
-                        id: connectToggle
-                        group: "tools"
-                        text: "Connect"
-                        on_press: root.setTool("connect")
-                    ToolToggleButton:
-                        id: disconnectToggle
-                        group: "tools"
-                        text: "Disconnect"
-                        on_press: root.setTool("disconnect")
-                    ToolToggleButton:
-                        id: moveToggle
-                        state: "down"
-                        group: "tools"
-                        text: "Move"
-                        on_press: root.setTool("move")
+                ToolToggleButton:
+                    id: connectToggle
+                    group: "tools"
+                    text: "Connect"
+                    on_press: root.setTool("connect")
+                ToolToggleButton:
+                    id: disconnectToggle
+                    group: "tools"
+                    text: "Disconnect"
+                    on_press: root.setTool("disconnect")
+                ToolToggleButton:
+                    id: moveToggle
+                    state: "down"
+                    group: "tools"
+                    text: "Move"
+                    on_press: root.setTool("move")
                 ToolButton:
                     text: "Delete"
                     on_press: root.deleteGates()
@@ -123,6 +121,7 @@
                     on_press: root.clearCanvas()
                 Label:
                     id: toolLabel
+                    color: 0,0,0,1
                     text: gateCanvas.tool
             GateCanvas:
                 id: gateCanvas

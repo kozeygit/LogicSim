@@ -23,7 +23,7 @@ class Board:
             if gate1.connectNode(gate2, 2):
                 return 2
         return 0
-        
+
     def disconnectGate(self, gate1, gate2):
         return gate1.disconnectNode(gate2)
     
