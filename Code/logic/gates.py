@@ -4,6 +4,7 @@ Gates Vectors Needed: And, Or, Xor, Not, Switch(on, off), Output(on, off)
 '''
 
 class Gate: #Logic gates parent class
+    '''Logic Gate parent class'''
     ID = 0
     def __init__(self):
         self._input_nodes = [None, None]
@@ -128,6 +129,7 @@ class Gate: #Logic gates parent class
 
 
 class And_Gate(Gate):
+    
     def __init__(self):
         super().__init__()
         self._type = 'and'

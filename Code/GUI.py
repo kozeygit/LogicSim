@@ -30,7 +30,11 @@ class ExitPopup(Popup):
         sys.exit()
 
 class ConnectionLine(Widget):
-    def __init__(self, gate1, gate2):
+    def __init__(self, outGate, inGate, inNode):
+        self.out_gate = outGate
+        self.in_gate = inGate
+        self.in_gate_node = inNode
+        self.state = None
         self.line = Line()
     pass
 
@@ -60,14 +64,14 @@ class GateCanvas(FloatLayout):
         self.tool = tool
     
     def connect(self, touch):
+        if not self.collide_point(*touch.pos):
+            return False
         self.deselectGates()
         for child in self.gates[:]:
             if child.collide_point(*touch.pos):
                 child.select()
                 return True
-        if self.collide_point(*touch.pos):
-            return True
-        return False
+        return True
 
     
 
@@ -100,7 +104,6 @@ class GateCanvas(FloatLayout):
                             print(len(self.getSelectedGates()))
                             node = self.board.connectGate(self.getSelectedGates()[1].getLogicGate(), self.getSelectedGates()[0].getLogicGate())
                             (i.update_state() for i in self.gates[:])
-                            self.root.setTool('move')
                             return True
                         else:
                             self.deselectGates()
@@ -234,15 +237,21 @@ class DragSwitch(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.logic_gate = Switch()
-        self.canvas.add(toggle)
+        self.toggle = Rectangle(pos=self.pos, size=self.size)
+        self.canvas.add(self.toggle)
+        self.bind(pos=self.redraw, size=self.redraw)
+
+        
+        self.toggle = Rectangle(pos=(self.pos), size=(self.size))
         self.states = {1:"Images/GateIcons/switch_on.png", 0:"Images/GateIcons/switch_off.png"}
         self.img.source = self.states[self.logic_gate.getOutput()]
 
+    def redraw(self, *args):
+        self.toggle.size = self.size
+        self.toggle.pos = self.pos
+
     def on_touch_down(self, touch):
-        if self.canvas.toggle.collide_point(*touch.pos):
-            self.logic_gate.flip()
-            self.update_state()
-        elif self.collide_point(*touch.pos):
+        if self.collide_point(*touch.pos):
             self.dragged = False
             #print(self.logic_gate.getOutput())
         return super().on_touch_down(touch)
