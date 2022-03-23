@@ -260,7 +260,7 @@ class Switch:
 class Output:
     ID = 65
     def __init__(self):
-        self._output = -1
+        self._output = None
         self._input_nodes = [None]
         self._type = 'output'
         self.id = chr(Output.ID)

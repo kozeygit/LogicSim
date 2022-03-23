@@ -5,7 +5,7 @@ kivy.require('2.0.0')
 from kivy.app import App
 from kivy.config import Config
 from kivy.core.window import Window
-from kivy.graphics import Color, Line, Rectangle, RoundedRectangle
+from kivy.graphics import Color, Line, Rectangle, RoundedRectangle, Ellipse
 from kivy.graphics.svg import Svg
 from kivy.lang import Builder
 from kivy.properties import ObjectProperty, NumericProperty, BooleanProperty
@@ -56,6 +56,11 @@ class GateCanvas(FloatLayout):
             "clock":None
         }
 
+    def updateStates(self):
+        print("updating")
+        for i in self.gates:
+            i.update_state()
+    
     # i have no idea how to do this??
     def addConnectionLine(self, exit_gate, input_gate, input_node):
         line = ConnectionLine()
@@ -63,7 +68,7 @@ class GateCanvas(FloatLayout):
     def setTool(self, tool):
         self.tool = tool
     
-    def connect(self, touch):
+    def connect_down(self, touch):
         if not self.collide_point(*touch.pos):
             return False
         self.deselectGates()
@@ -73,10 +78,24 @@ class GateCanvas(FloatLayout):
                 return True
         return True
 
-    
+    def connect_up(self, touch):
+        for child in self.gates[:]:
+            if child.collide_point(*touch.pos):
+                if child not in self.getSelectedGates():
+                    child.select()
+                    inGate = self.getSelectedGates()[1]
+                    outGate = self.getSelectedGates()[0]
+                    print(len(self.getSelectedGates()))
+                    node = self.board.connectGate(inGate.getLogicGate(), outGate.getLogicGate())
+                    (i.update_state() for i in self.gates[:])
+                    self.connection_lines.append(Line(points=(inGate.pos, outGate.pos)))
+                    self.canvas.add(self.connection_lines[-1])
+                    self.updateStates()
+                else:
+                    self.deselectGates()
+        return True
 
-    def move(self, touch):
-        #if the touch is not for me, and if i don't want to use it, avoid it.
+    def move_down(self, touch):
         for child in self.gates[:]:
             if child.dispatch('on_touch_down', touch):
                 return True
@@ -85,33 +104,29 @@ class GateCanvas(FloatLayout):
         self.deselectGates()
         return True
 
+
+
     def on_touch_down(self, touch):
-        #print(self.board.gates)
-        if self.tool == "connect":
-            return self.connect(touch)
-        if self.tool == "disconect":
-            pass
-        if self.tool == "move":
-            return self.move(touch)
+        if self.collide_point(*touch.pos): 
+            if touch.is_double_tap and self.tool != "move":
+                self.root.setTool("move")
+                return True
+            #print(self.board.gates)
+            if self.tool == "connect":
+                return self.connect_down(touch)
+            if self.tool == "disconect":
+                pass
+            if self.tool == "move":
+                return self.move_down(touch)
 
     def on_touch_up(self, touch):
         if self.collide_point(*touch.pos):
             if self.tool == "connect":
-                for child in self.gates[:]:
-                    if child.collide_point(*touch.pos):
-                        if child not in self.getSelectedGates():
-                            child.select()
-                            print(len(self.getSelectedGates()))
-                            node = self.board.connectGate(self.getSelectedGates()[1].getLogicGate(), self.getSelectedGates()[0].getLogicGate())
-                            (i.update_state() for i in self.gates[:])
-                            return True
-                        else:
-                            self.deselectGates()
+                return self.connect_up(touch)
             if self.tool == "disconect":
                 pass
             if self.tool == "move":
                 return super().on_touch_up(touch)
-            print(self.getSelectedGates())
         return super().on_touch_up(touch)
    
     
@@ -128,16 +143,18 @@ class GateCanvas(FloatLayout):
         self.gates.append(new_gate)
         new_gate.root = self.root
         self.board.addGate(new_gate.getLogicGate())
+        new_gate.update_state()
         #print(self.board.gates)
 
     def deleteGates(self):
         if not self.tool == "move":
-            self.tool = "move"
+            self.root.setTool("move")
         else:
             for i in self.getSelectedGates():
                 self.board.removeGate(i.getLogicGate())
                 self.remove_widget(i)
                 self.gates.remove(i)
+                self.updateStates()
 
     def clearCanvas(self):
         self.board.clearBoard()
@@ -162,9 +179,10 @@ class DragGate(DragBehavior, FloatLayout):
         self.border = Line(rounded_rectangle = (self.x, self.y, self.width, self.height, 10))
         self.canvas.add(self.border)
         
-        self.root = None
-        self.nodes = []
+        self.nodes = [Ellipse(pos=(self.right-10, self.top-10), size=(10,10))]
+        self.canvas.add(self.nodes[0])
         self.logic_gate = None
+        self.state = None
         self.dragged = False
         self.select()
         #print(self.parent)
@@ -201,15 +219,14 @@ class DragGate(DragBehavior, FloatLayout):
         self.dragged = True
         self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)
         self.img.pos = self.pos
-        
-        if self.x < self.parent.x:
-            self.x = self.parent.x
-        elif self.y < self.parent.y:
-            self.y = self.parent.y
-        elif self.right > self.parent.right:
-            self.right = self.parent.right
-        elif self.top > self.parent.top:
-            self.top = self.parent.top
+        if self.x < self.parent.x+5:
+            self.x = self.parent.x+5
+        elif self.y < self.parent.y+5:
+            self.y = self.parent.y+5
+        elif self.right > self.parent.right-5:
+            self.right = self.parent.right-5
+        elif self.top > self.parent.top-5:
+            self.top = self.parent.top-5
         else:
             #print(self.pos)
             pass
@@ -224,40 +241,40 @@ class DragGate(DragBehavior, FloatLayout):
             self.deselect()
         else:
             self.select()
-
         return super().on_touch_up(touch)
 
     def getLogicGate(self):
         return self.logic_gate
 
     def update_state(self):
-        pass
+        x = self.logic_gate.getOutput()
+        print(self, "I AM UPDATING", x)
+        self.state = x
 
 class DragSwitch(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.logic_gate = Switch()
-        self.toggle = Rectangle(pos=self.pos, size=self.size)
-        self.canvas.add(self.toggle)
-        self.bind(pos=self.redraw, size=self.redraw)
-
-        
-        self.toggle = Rectangle(pos=(self.pos), size=(self.size))
         self.states = {1:"Images/GateIcons/switch_on.png", 0:"Images/GateIcons/switch_off.png"}
         self.img.source = self.states[self.logic_gate.getOutput()]
 
-    def redraw(self, *args):
-        self.toggle.size = self.size
-        self.toggle.pos = self.pos
-
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            self.dragged = False
-            #print(self.logic_gate.getOutput())
-        return super().on_touch_down(touch)
-
+    #accounts for if user wants to change state
+    def on_touch_up(self, touch):
+        if self.dragged:
+            return super().on_touch_up(touch)
+        elif (touch.pos[0] < self.right - 30) and (touch.pos[0] > self.x + 10) and (touch.pos[1] < self.top - 20) and (touch.pos[1] > self.y + 20):
+            print("BUTTTON PRESSED, I REPEAT BUTTON PRESSED", self.dragged)
+            self.logic_gate.flip()
+            self.update_state()
+            self.parent.updateStates()
+            return True
+        return super().on_touch_up(touch)
+    
     def update_state(self):
-        self.img.source = self.states[self.logic_gate.getOutput()]
+        x = self.logic_gate.getOutput()
+        print(self, "I AM UPDATING", x)
+        self.state = x
+        self.img.source = self.states[self.state]
 
 class DragOutput(DragGate):
     def __init__(self, **kwargs):
@@ -266,9 +283,11 @@ class DragOutput(DragGate):
         self.states = {1:"Images/GateIcons/output_on.png", 0:"Images/GateIcons/output_off.png", None:"Images/GateIcons/output_empty.png"}
         self.update_state()
 
-    
     def update_state(self):
-        self.img.source = self.states[self.logic_gate.getOutput()]
+        x = self.logic_gate.getOutput()
+        print(self, "I AM UPDATING", x)
+        self.state = x
+        self.img.source = self.states[self.state]
 
 
 class DragAndGate(DragGate):
@@ -322,10 +341,7 @@ class MainWindow(Widget):
 
     def deleteGates(self):
         self.ids["gateCanvas"].deleteGates()
-        self.ids["toolLabel"].text = 'move'
-        self.ids["connectToggle"].state = "normal"
-        self.ids["disconnectToggle"].state = "normal"
-        self.ids["moveToggle"].state = "down"
+        self.setTool("move")
 
     def addGateToCanvas(self, gate_type):
         self.ids["gateCanvas"].addGate(gate_type)
