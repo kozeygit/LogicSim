@@ -43,7 +43,9 @@ class GateCanvas(FloatLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.connection_lines = []
+        self.connection_list = []
         self.gates = []
+        
         self.tool = "move"
         self.board = Board()
         self.gate_dict = {
@@ -67,7 +69,7 @@ class GateCanvas(FloatLayout):
     
     def setTool(self, tool):
         self.tool = tool
-    
+        
     def connect_down(self, touch):
         if not self.collide_point(*touch.pos):
             return False
@@ -77,6 +79,18 @@ class GateCanvas(FloatLayout):
                 child.select()
                 return True
         return True
+
+    # def connect_down(self, touch):
+    #     if not self.collide_point(*touch.pos):
+    #         return False
+    #     self.deselectGates()
+    #     for child in self.gates[:]:
+    #         for node in child.getNodes():
+    #         if node.collide_point(*touch.pos):
+    #             child.select()
+    #             self.connection_gates.
+    #             return True
+    #     return True
 
     def connect_up(self, touch):
         for child in self.gates[:]:
@@ -176,16 +190,35 @@ class DragGate(DragBehavior, FloatLayout):
         
         self.img = Image(pos = self.pos, size_hint = (1,1))
         self.add_widget(self.img)
+        
+        node_source="Images/GateIcons/node.png"
+        self.in_node_1 = Image(source=node_source, pos=(self.x, self.top-10), size_hint=(None, None))
+        self.in_node_2 = Image(source=node_source, pos=(self.x, self.y+10), size_hint=(None, None))
+        self.out_node = Image(source=node_source, pos=(self.right, self.y+(self.height//2)), size_hint=(None, None))
+        self.add_widget(self.in_node_1)
+        self.add_widget(self.in_node_2)
+        self.add_widget(self.out_node)
+
         self.border = Line(rounded_rectangle = (self.x, self.y, self.width, self.height, 10))
         self.canvas.add(self.border)
         
-        self.nodes = [Ellipse(pos=(self.right-10, self.top-10), size=(10,10))]
-        self.canvas.add(self.nodes[0])
         self.logic_gate = None
         self.state = None
         self.dragged = False
         self.select()
+        self.bind
         #print(self.parent)
+
+    def on_pos(self, *args, **kwargs):
+        try:
+            self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)
+            self.img.pos = self.pos
+            self.in_node_1.pos=(self.x, self.top-10)
+            self.in_node_2.pos=(self.x, self.y+10)
+            self.out_node.pos=(self.right, self.y+(self.height//2))
+        #self.nodes
+        except AttributeError as e:
+            print("Gate not made yet", e)
 
     def isSelected(self):
         return self.selected
@@ -217,8 +250,6 @@ class DragGate(DragBehavior, FloatLayout):
             return super().on_touch_move(touch)
         self.select()
         self.dragged = True
-        self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)
-        self.img.pos = self.pos
         if self.x < self.parent.x+5:
             self.x = self.parent.x+5
         elif self.y < self.parent.y+5:
@@ -228,9 +259,7 @@ class DragGate(DragBehavior, FloatLayout):
         elif self.top > self.parent.top-5:
             self.top = self.parent.top-5
         else:
-            #print(self.pos)
-            pass
-        return super().on_touch_move(touch)
+            return super().on_touch_move(touch)
 
     def on_touch_up(self, touch):
         if not self.collide_point(*touch.pos):

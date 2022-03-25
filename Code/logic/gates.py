@@ -171,8 +171,9 @@ class Not_Gate(Gate):
 
   # Rewrite, doesnt handle flip flop recursion
     def _process(self):
-        var1 = self._input_nodes[0].getOutput()
-        self._output = self.evaluate(var1)
+        if self.hasInput():
+            var1 = self._input_nodes[0].getOutput()
+            self._output = self.evaluate(var1)
     
     def connectNode(self, gate, node):
         if node == 1:
