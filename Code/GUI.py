@@ -69,6 +69,13 @@ class GateCanvas(FloatLayout):
     
     def setTool(self, tool):
         self.tool = tool
+        if tool in ("connect", "disconnect"):
+            for i in self.gates[:]:
+                i.showNodes()
+        else:
+            for i in self.gates[:]:
+                i.hideNodes()
+
         
     def connect_down(self, touch):
         if not self.collide_point(*touch.pos):
@@ -117,8 +124,6 @@ class GateCanvas(FloatLayout):
             return False
         self.deselectGates()
         return True
-
-
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos): 
@@ -191,13 +196,7 @@ class DragGate(DragBehavior, FloatLayout):
         self.img = Image(pos = self.pos, size_hint = (1,1))
         self.add_widget(self.img)
         
-        node_source="Images/GateIcons/node.png"
-        self.in_node_1 = Image(source=node_source, pos=(self.x, self.top-10), size_hint=(None, None))
-        self.in_node_2 = Image(source=node_source, pos=(self.x, self.y+10), size_hint=(None, None))
-        self.out_node = Image(source=node_source, pos=(self.right, self.y+(self.height//2)), size_hint=(None, None))
-        self.add_widget(self.in_node_1)
-        self.add_widget(self.in_node_2)
-        self.add_widget(self.out_node)
+        self.nodes_init()
 
         self.border = Line(rounded_rectangle = (self.x, self.y, self.width, self.height, 10))
         self.canvas.add(self.border)
@@ -206,16 +205,29 @@ class DragGate(DragBehavior, FloatLayout):
         self.state = None
         self.dragged = False
         self.select()
-        self.bind
         #print(self.parent)
+
+    def nodes_init(self):
+        node_source="Images/GateIcons/node.png"
+        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.top-29), size_hint=(None, None), size=(12,12))
+        self.in_node_2 = Image(source=node_source, pos=(self.x-6, self.y+18), size_hint=(None, None), size=(12,12))
+        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.add_widget(self.in_node_1)
+        self.add_widget(self.in_node_2)
+        self.add_widget(self.out_node)
+        self.hideNodes() 
+
+    def nodes_update(self):
+        self.in_node_1.pos=(self.x-6, self.top-29)
+        self.in_node_2.pos=(self.x-6, self.y+18)
+        self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
+
 
     def on_pos(self, *args, **kwargs):
         try:
             self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)
             self.img.pos = self.pos
-            self.in_node_1.pos=(self.x, self.top-10)
-            self.in_node_2.pos=(self.x, self.y+10)
-            self.out_node.pos=(self.right, self.y+(self.height//2))
+            self.nodes_update()
         #self.nodes
         except AttributeError as e:
             print("Gate not made yet", e)
@@ -224,17 +236,18 @@ class DragGate(DragBehavior, FloatLayout):
         return self.selected
 
     def showNodes(self):
-        for node in self.nodes:
-            self.nodes.colour
+        self.in_node_1.opacity=1
+        self.in_node_2.opacity=1
+        self.out_node.opacity=1
 
     def hideNodes(self):
-        for node in self.nodes:
-            self.remove_widget(node)
+        self.in_node_1.opacity=0
+        self.in_node_2.opacity=0
+        self.out_node.opacity=0
 
     def select(self):
         self.selected = True
         self.border.width = 2
-        #print(self.root)
 
     def deselect(self):
         self.selected = False
@@ -287,6 +300,15 @@ class DragSwitch(DragGate):
         self.states = {1:"Images/GateIcons/switch_on.png", 0:"Images/GateIcons/switch_off.png"}
         self.img.source = self.states[self.logic_gate.getOutput()]
 
+    def nodes_init(self):
+        node_source="Images/GateIcons/node.png"
+        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.add_widget(self.in_node_1)
+        self.hideNodes() 
+
+    def nodes_update(self):
+        self.in_node_1.pos=(self.x-6, self.y+(self.height//2)-4)
+
     #accounts for if user wants to change state
     def on_touch_up(self, touch):
         if self.dragged:
@@ -311,6 +333,21 @@ class DragOutput(DragGate):
         self.logic_gate = Output()
         self.states = {1:"Images/GateIcons/output_on.png", 0:"Images/GateIcons/output_off.png", None:"Images/GateIcons/output_empty.png"}
         self.update_state()
+
+    def nodes_init(self):
+        node_source="Images/GateIcons/node.png"
+        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.top-29), size_hint=(None, None), size=(12,12))
+        self.in_node_2 = Image(source=node_source, pos=(self.x-6, self.y+18), size_hint=(None, None), size=(12,12))
+        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.add_widget(self.in_node_1)
+        self.add_widget(self.in_node_2)
+        self.add_widget(self.out_node)
+        self.hideNodes()
+
+    def nodes_update(self):
+        self.in_node_1.pos=(self.x-6, self.top-29)
+        self.in_node_2.pos=(self.x-6, self.y+18)
+        self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
 
     def update_state(self):
         x = self.logic_gate.getOutput()
@@ -343,8 +380,18 @@ class DragNotGate(DragGate):
         self.img.source = "Images/GateIcons/not.png"
         self.logic_gate = Not_Gate()
 
+    def nodes_init(self):
+        node_source="Images/GateIcons/node.png"
+        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.add_widget(self.in_node_1)
+        self.add_widget(self.out_node)
+        self.hideNodes()
 
-    
+    def nodes_update(self):
+        self.in_node_1.pos=(self.x-6, self.y+(self.height//2)-4)
+        self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
+
 
 class MainWindow(Widget):
     def __init__(self, **kwargs):
