@@ -52,7 +52,8 @@ class GateCanvas(FloatLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.connection_lines = []
-        self.connection_list = []
+        self.in_connection = None
+        self.out_connection = None
         self.gates = []
         
         self.tool = "move"
@@ -91,38 +92,35 @@ class GateCanvas(FloatLayout):
             return False
         self.deselectGates()
         for child in self.gates[:]:
-            if child.collide_point(*touch.pos):
-                child.select()
+            if node := child.getNodeCollide(touch):
+                if node = -1:
+                    self.out_connection = (node, child)
+                else:
+                    self.in_connection = (node, child)
+                child.selectNode(node)
                 return True
         return True
 
-    # def connect_down(self, touch):
-    #     if not self.collide_point(*touch.pos):
-    #         return False
-    #     self.deselectGates()
-    #     for child in self.gates[:]:
-    #         for node in child.getNodes():
-    #         if node.collide_point(*touch.pos):
-    #             child.select()
-    #             self.connection_gates.
-    #             return True
-    #     return True
 
     def connect_up(self, touch):
         for child in self.gates[:]:
-            if child.collide_point(*touch.pos):
-                if child not in self.getSelectedGates():
-                    child.select()
-                    inGate = self.getSelectedGates()[1]
-                    outGate = self.getSelectedGates()[0]
-                    print(len(self.getSelectedGates()))
-                    node = self.board.connectGate(inGate.getLogicGate(), outGate.getLogicGate())
-                    (i.update_state() for i in self.gates[:])
-                    self.connection_lines.append(Line(points=(inGate.pos, outGate.pos)))
-                    self.canvas.add(self.connection_lines[-1])
-                    self.updateStates()
+            if node := child.getNodeCollide(touch):
+                if node = -1:
+                    self.out_connection = (node, child)
                 else:
-                    self.deselectGates()
+                    self.in_connection = (node, child)
+                child.selectNode(node)
+                
+                in_gate = self.in_connection[1]
+                out_gate = self.out_connection[1]
+                in_node = self.in_connection[0]
+                self.board.connectGate(in_gate.getLogicGate(), out_gate.getLogicGate(), node=in_node)
+                (i.update_state() for i in self.gates[:])
+                self.connection_lines.append(Line(points=(in_gate.pos, out_gate.pos)))
+                self.canvas.add(self.connection_lines[-1])
+                self.updateStates()
+            else:
+                self.deselectGates()
         return True
 
     def move_down(self, touch):
@@ -235,7 +233,33 @@ class DragGate(DragBehavior, FloatLayout):
         self.in_node_2.pos=(self.x-6, self.y+18)
         self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
 
+    def getNodeCollide(self, touch):
+        for i in self.nodes:
+            if i.collide_point(*touch.pos):
+                if i == self.in_node_1:
+                    return 0
+                elif i == self.in_node_2:
+                    return 1
+                elif i == self.out_node:
+                    return -1
+        return False
 
+    def selectNode(self, node_index):
+        node = self.getNode(node_index)
+        node.color = (0.3, 0.7, 0.7, 1)
+
+    def deselectNode(self, node_index)
+        node = self.getNode(node_index)
+        node.color = (1, 1, 1, 1)
+    
+    def getNode(self, index):
+        if index == 0:
+            return self.input_node_1
+        if index == 1:
+            return self.input_node_2
+        if index == -1:
+            return self.out_node
+    
     def on_pos(self, *args, **kwargs):
         try:
             self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)

@@ -17,12 +17,14 @@ class Board:
         self.gates.remove(gate)
     
     def connectGate(self, inGate, outGate, node=0):
-        if inGate.connectNode(outGate, 1):
-            return 1
-        if inGate.getGateType() != "not" or inGate.getGateType() != "output":
-            if inGate.connectNode(outGate, 2):
-                return 2
-        return 0
+        if node == 1:
+            if inGate.connectNode(outGate, 1):
+                return True
+        if node == 2:
+            if inGate.getGateType() != "not" or inGate.getGateType() != "output":
+                if inGate.connectNode(outGate, 2):
+                    return True
+        return False
 
     def disconnectGate(self, gate1, gate2):
         return gate1.disconnectNode(gate2)
