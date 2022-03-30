@@ -22,12 +22,21 @@ from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
 from logic.board import Board
 from logic.gates import *
+from logic.truth_table import *
 
 Window.maximize()
 
 class ExitPopup(Popup):
     def closeWindow(self):
         sys.exit()
+
+class TruthPopup(Popup):
+    def generate(self):
+        input = self.ids["truth_input"].text 
+        out = generateTruthTable(input)
+        
+        self.ids["truth_label"].text = input
+        print("TRUTH TABLE GENERATED\n"*5)
 
 class ConnectionLine(Widget):
     def __init__(self, outGate, inGate, inNode):
@@ -196,6 +205,7 @@ class DragGate(DragBehavior, FloatLayout):
         self.img = Image(pos = self.pos, size_hint = (1,1))
         self.add_widget(self.img)
         
+        self.nodes = []
         self.nodes_init()
 
         self.border = Line(rounded_rectangle = (self.x, self.y, self.width, self.height, 10))
@@ -212,6 +222,9 @@ class DragGate(DragBehavior, FloatLayout):
         self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.top-29), size_hint=(None, None), size=(12,12))
         self.in_node_2 = Image(source=node_source, pos=(self.x-6, self.y+18), size_hint=(None, None), size=(12,12))
         self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.nodes.append(self.in_node_1)
+        self.nodes.append(self.in_node_2)
+        self.nodes.append(self.out_node)
         self.add_widget(self.in_node_1)
         self.add_widget(self.in_node_2)
         self.add_widget(self.out_node)
@@ -236,14 +249,14 @@ class DragGate(DragBehavior, FloatLayout):
         return self.selected
 
     def showNodes(self):
-        self.in_node_1.opacity=1
-        self.in_node_2.opacity=1
-        self.out_node.opacity=1
+        for i in self.nodes:
+            i.opacity = 1
+            i.disabled = False
 
     def hideNodes(self):
-        self.in_node_1.opacity=0
-        self.in_node_2.opacity=0
-        self.out_node.opacity=0
+        for i in self.nodes:
+            i.opacity = 1
+            i.disabled = True
 
     def select(self):
         self.selected = True
@@ -302,12 +315,13 @@ class DragSwitch(DragGate):
 
     def nodes_init(self):
         node_source="Images/GateIcons/node.png"
-        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
-        self.add_widget(self.in_node_1)
+        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.add_widget(self.out_node)
+        self.nodes.append(self.out_node)
         self.hideNodes() 
 
     def nodes_update(self):
-        self.in_node_1.pos=(self.x-6, self.y+(self.height//2)-4)
+        self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
 
     #accounts for if user wants to change state
     def on_touch_up(self, touch):
@@ -336,18 +350,13 @@ class DragOutput(DragGate):
 
     def nodes_init(self):
         node_source="Images/GateIcons/node.png"
-        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.top-29), size_hint=(None, None), size=(12,12))
-        self.in_node_2 = Image(source=node_source, pos=(self.x-6, self.y+18), size_hint=(None, None), size=(12,12))
-        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
         self.add_widget(self.in_node_1)
-        self.add_widget(self.in_node_2)
-        self.add_widget(self.out_node)
+        self.nodes.append(self.in_node_1)
         self.hideNodes()
 
     def nodes_update(self):
-        self.in_node_1.pos=(self.x-6, self.top-29)
-        self.in_node_2.pos=(self.x-6, self.y+18)
-        self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
+        self.in_node_1.pos=(self.x-6, self.y+(self.height//2)-4)
 
     def update_state(self):
         x = self.logic_gate.getOutput()
@@ -386,6 +395,8 @@ class DragNotGate(DragGate):
         self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
         self.add_widget(self.in_node_1)
         self.add_widget(self.out_node)
+        self.nodes.append(self.in_node_1)
+        self.nodes.append(self.out_node)
         self.hideNodes()
 
     def nodes_update(self):

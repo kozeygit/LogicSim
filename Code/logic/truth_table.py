@@ -9,7 +9,11 @@ def getTruthTableOutputs(expression, dictionary, num_permutations):
         expression_with_variables = expression
         for variable in truth_dictionary:
             expression_with_variables = expression_with_variables.replace(variable, str(dictionary[variable][i]))
-        output = eval(expression_with_variables)
+        try:
+            output = eval(expression_with_variables)
+        except SyntaxError as e:
+            print(e, expression_with_variables)
+            return "Error"
         list_of_outputs.append(output)
     truth_dictionary['OUT'] = list_of_outputs
     return truth_dictionary
@@ -52,6 +56,12 @@ def generateTruthTable(expression):
 
     final_dictionary = getTruthTableOutputs(expression, dictionary, len(variable_permutations))
 
+    if final_dictionary == "Error":
+        return "Invalid Input"
+    else:
+        return (input_expression, final_dictionary)
+
+def truth_dict_to__string(final_dictionary, input_expression):
     final_string = ''
     final_string = final_string + str("Boolean Expression: " + input_expression.upper() + "\n")
     for i in final_dictionary:

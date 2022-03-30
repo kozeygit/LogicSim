@@ -26,9 +26,6 @@ class Board:
 
     def disconnectGate(self, gate1, gate2):
         return gate1.disconnectNode(gate2)
-    
-    def getTruthTable(self, gate):
-        return generateTruthTable(gate.getExpression())
 
     def clearBoard(self):
         for i in self.gates[:]:

@@ -45,6 +45,40 @@
             text: 'Quit'
             on_release: root.closeWindow()
 
+<TruthPopup>:
+    auto_dismiss: True
+    title_color: 0,0,0,1
+    title_size: 18
+    title: "Truth Table Generator"
+    size_hint: 0.6, 0.8
+    BoxLayout:
+        orientation: "vertical"
+        ScrollView:
+            size_hint: 1, 0.6
+            do_scroll_x: False
+            effect_cls: "ScrollEffect"
+            Label:
+                id: truth_label
+                size_hint_y: None
+                text_size: self.width, None
+                height: self.texture_size[1]
+                color: (0,0,0,1)
+                text: "YOOOOOOO"
+        TextInput:
+            id: truth_input
+            text: Enter Boolean Expression
+            size_hint: 1, 0.2
+        GridLayout:
+            size_hint: 1, 0.2
+            rows: 1
+            columns: 2
+            Button:
+                text: 'Cancel'
+                on_release: root.dismiss()
+            Button:
+                text: 'Generate' 
+                on_release: root.generate()
+
 
 <GridLayout>:
     padding: 2
@@ -76,6 +110,9 @@
                     app_icon: "Images/Me.jpg"
                     app_icon_height: 0
                     app_icon_width: 0
+                ActionButton:
+                    text: "Truth Table"
+                    on_release: Factory.TruthPopup().open()
                 ActionButton:
                     text: "Save"
                 ActionButton:
