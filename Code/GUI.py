@@ -93,7 +93,7 @@ class GateCanvas(FloatLayout):
         self.deselectGates()
         for child in self.gates[:]:
             if node := child.getNodeCollide(touch):
-                if node = -1:
+                if node == -1:
                     self.out_connection = (node, child)
                 else:
                     self.in_connection = (node, child)
@@ -105,7 +105,7 @@ class GateCanvas(FloatLayout):
     def connect_up(self, touch):
         for child in self.gates[:]:
             if node := child.getNodeCollide(touch):
-                if node = -1:
+                if node == -1:
                     self.out_connection = (node, child)
                 else:
                     self.in_connection = (node, child)
@@ -248,7 +248,7 @@ class DragGate(DragBehavior, FloatLayout):
         node = self.getNode(node_index)
         node.color = (0.3, 0.7, 0.7, 1)
 
-    def deselectNode(self, node_index)
+    def deselectNode(self, node_index):
         node = self.getNode(node_index)
         node.color = (1, 1, 1, 1)
     
