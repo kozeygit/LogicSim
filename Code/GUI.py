@@ -71,7 +71,7 @@ class GateCanvas(FloatLayout):
     def updateStates(self):
         print("updating")
         for i in self.gates:
-            i.update_state()
+            i.updateState()
     
     # i have no idea how to do this??
     def addConnectionLine(self, exit_gate, input_gate, input_node):
@@ -115,12 +115,16 @@ class GateCanvas(FloatLayout):
                 out_gate = self.out_connection[1]
                 in_node = self.in_connection[0]
                 self.board.connectGate(in_gate.getLogicGate(), out_gate.getLogicGate(), node=in_node)
-                (i.update_state() for i in self.gates[:])
                 self.connection_lines.append(Line(points=(in_gate.pos, out_gate.pos)))
                 self.canvas.add(self.connection_lines[-1])
                 self.updateStates()
-            else:
-                self.deselectGates()
+                
+                self.out_connection = None
+                self.in_connection = None
+                return True
+            
+        self.out_connection = None
+        self.in_connection = None
         return True
 
     def move_down(self, touch):
@@ -169,7 +173,7 @@ class GateCanvas(FloatLayout):
         self.gates.append(new_gate)
         new_gate.root = self.root
         self.board.addGate(new_gate.getLogicGate())
-        new_gate.update_state()
+        new_gate.updateState()
         #print(self.board.gates)
 
     def deleteGates(self):
@@ -228,7 +232,7 @@ class DragGate(DragBehavior, FloatLayout):
         self.add_widget(self.out_node)
         self.hideNodes() 
 
-    def nodes_update(self):
+    def updateNodes(self):
         self.in_node_1.pos=(self.x-6, self.top-29)
         self.in_node_2.pos=(self.x-6, self.y+18)
         self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
@@ -237,9 +241,9 @@ class DragGate(DragBehavior, FloatLayout):
         for i in self.nodes:
             if i.collide_point(*touch.pos):
                 if i == self.in_node_1:
-                    return 0
-                elif i == self.in_node_2:
                     return 1
+                elif i == self.in_node_2:
+                    return 2
                 elif i == self.out_node:
                     return -1
         return False
@@ -253,10 +257,10 @@ class DragGate(DragBehavior, FloatLayout):
         node.color = (1, 1, 1, 1)
     
     def getNode(self, index):
-        if index == 0:
-            return self.input_node_1
         if index == 1:
-            return self.input_node_2
+            return self.in_node_1
+        if index == 2:
+            return self.in_node_2
         if index == -1:
             return self.out_node
     
@@ -264,7 +268,7 @@ class DragGate(DragBehavior, FloatLayout):
         try:
             self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)
             self.img.pos = self.pos
-            self.nodes_update()
+            self.updateNodes()
         #self.nodes
         except AttributeError as e:
             print("Gate not made yet", e)
@@ -325,7 +329,7 @@ class DragGate(DragBehavior, FloatLayout):
     def getLogicGate(self):
         return self.logic_gate
 
-    def update_state(self):
+    def updateState(self):
         x = self.logic_gate.getOutput()
         print(self, "I AM UPDATING", x)
         self.state = x
@@ -344,8 +348,15 @@ class DragSwitch(DragGate):
         self.nodes.append(self.out_node)
         self.hideNodes() 
 
-    def nodes_update(self):
+    def updateNodes(self):
         self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
+
+    def getNodeCollide(self, touch):
+        for i in self.nodes:
+            if i.collide_point(*touch.pos):
+                if i == self.out_node:
+                    return -1
+        return False
 
     #accounts for if user wants to change state
     def on_touch_up(self, touch):
@@ -354,12 +365,12 @@ class DragSwitch(DragGate):
         elif (touch.pos[0] < self.right - 30) and (touch.pos[0] > self.x + 10) and (touch.pos[1] < self.top - 20) and (touch.pos[1] > self.y + 20):
             print("BUTTTON PRESSED, I REPEAT BUTTON PRESSED", self.dragged)
             self.logic_gate.flip()
-            self.update_state()
+            self.updateState()
             self.parent.updateStates()
             return True
         return super().on_touch_up(touch)
     
-    def update_state(self):
+    def updateState(self):
         x = self.logic_gate.getOutput()
         print(self, "I AM UPDATING", x)
         self.state = x
@@ -370,7 +381,7 @@ class DragOutput(DragGate):
         super().__init__(**kwargs)
         self.logic_gate = Output()
         self.states = {1:"Images/GateIcons/output_on.png", 0:"Images/GateIcons/output_off.png", None:"Images/GateIcons/output_empty.png"}
-        self.update_state()
+        self.updateState()
 
     def nodes_init(self):
         node_source="Images/GateIcons/node.png"
@@ -379,10 +390,17 @@ class DragOutput(DragGate):
         self.nodes.append(self.in_node_1)
         self.hideNodes()
 
-    def nodes_update(self):
+    def updateNodes(self):
         self.in_node_1.pos=(self.x-6, self.y+(self.height//2)-4)
 
-    def update_state(self):
+    def getNodeCollide(self, touch):
+        for i in self.nodes:
+            if i.collide_point(*touch.pos):
+                if i == self.in_node_1:
+                    return 1
+        return False
+
+    def updateState(self):
         x = self.logic_gate.getOutput()
         print(self, "I AM UPDATING", x)
         self.state = x
@@ -423,9 +441,18 @@ class DragNotGate(DragGate):
         self.nodes.append(self.out_node)
         self.hideNodes()
 
-    def nodes_update(self):
+    def updateNodes(self):
         self.in_node_1.pos=(self.x-6, self.y+(self.height//2)-4)
         self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
+
+    def getNodeCollide(self, touch):
+        for i in self.nodes:
+            if i.collide_point(*touch.pos):
+                if i == self.in_node_1:
+                    return 1
+                elif i == self.out_node:
+                    return -1
+        return False
 
 
 class MainWindow(Widget):
