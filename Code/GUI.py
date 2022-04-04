@@ -23,6 +23,7 @@ from kivy.uix.widget import Widget
 from logic.board import Board
 from logic.gates import *
 from logic.truth_table import *
+from tabulate import *
 
 Window.maximize()
 
@@ -44,9 +45,8 @@ class TruthPopup(Popup):
     def generate(self):
         input = self.ids["truth_input"].text 
         out = generateTruthTable(input)
-        out2 = truth_dict_to_string(*out)
-        self.ids["truth_label"].text = out2
-        print("TRUTH TABLE GENERATED\n"*5)
+        out2 = tabulate(out[0], headers=out[0].keys(), tablefmt="pretty")
+        self.ids["truth_label"].text = f"{out[1]}\n{out2}"
 
 class ConnectionLine(Widget):
     out_pos = NumericProperty()
