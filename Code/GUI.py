@@ -45,12 +45,14 @@ class TruthPopup(Popup):
     def generate(self):
         input = self.ids["truth_input"].text 
         out = generateTruthTable(input)
-        out2 = tabulate(out[0], headers=out[0].keys(), tablefmt="pretty")
-        self.ids["truth_label"].text = f"{out[1]}\n{out2}"
+        if out == "Invalid Input":
+            self.ids["truth_label"].text = ""
+        else:
+            out2 = tabulate(out[0], headers=out[0].keys(), tablefmt="pretty")
+            self.ids["truth_label"].text = f"{out[1]}\n{out2}"
 
 class ConnectionLine(Widget):
     out_pos = NumericProperty()
-    
 
     def setState(self, state):
         pass
@@ -59,6 +61,9 @@ class ConnectionLine(Widget):
         pass
 
     def setOutPos(self, pos):
+        pass
+
+    def addMidPoint(self):
         pass
 
 
@@ -291,7 +296,6 @@ class DragGate(DragBehavior, FloatLayout):
         try:
             self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)
             self.img.pos = self.pos
-            self.updateNodes()
         #self.nodes
         except AttributeError as e:
             print("Gate not made yet", e)
@@ -303,10 +307,11 @@ class DragGate(DragBehavior, FloatLayout):
         for i in self.nodes:
             i.opacity = 1
             i.disabled = False
+        self.updateNodes()
 
     def hideNodes(self):
         for i in self.nodes:
-            i.opacity = 1
+            i.opacity = 0
             i.disabled = True
 
     def select(self):
@@ -366,7 +371,7 @@ class DragSwitch(DragGate):
 
     def nodes_init(self):
         node_source="Images/GateIcons/node.png"
-        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(20,20))
         self.add_widget(self.out_node)
         self.nodes.append(self.out_node)
         self.hideNodes() 

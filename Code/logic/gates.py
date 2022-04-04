@@ -292,7 +292,12 @@ class Output:
         return False
 
     def disconnectAll(self):
-        pass
+        if self._input_nodes[0] == None:
+            pass
+        else:
+            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0] = None
+        self._process()
 
     def getExpression(self):
         return self._input_nodes[0].getExpression()
