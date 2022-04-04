@@ -24,6 +24,8 @@ from logic.board import Board
 from logic.gates import *
 from logic.truth_table import *
 
+from tabulate import *
+
 Window.maximize()
 
 class ExitPopup(Popup):
@@ -34,9 +36,8 @@ class TruthPopup(Popup):
     def generate(self):
         input = self.ids["truth_input"].text 
         out = generateTruthTable(input)
-        
-        self.ids["truth_label"].text = input
-        print("TRUTH TABLE GENERATED\n"*5)
+        out2 = tabulate(out[0], headers=out[0].keys(), tablefmt="pretty")
+        self.ids["truth_label"].text = f"{out[1]}\n{out2}"
 
 class ConnectionLine(Widget):
     def __init__(self, outGate, inGate, inNode):
