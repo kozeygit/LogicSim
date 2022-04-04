@@ -8,7 +8,7 @@
     background_color: 0.4,0.4,0.4,1
 
 <GateButton@Button>:
-    text: "gate"
+    
     font_size: 30
     size_hint: None, None
     center: self.parent.center
@@ -64,20 +64,27 @@
                 height: self.texture_size[1]
                 color: (0,0,0,1)
                 text: "YOOOOOOO"
-        TextInput:
-            id: truth_input
-            text: "Enter Boolean Expression"
-            size_hint: 1, 0.2
         GridLayout:
-            size_hint: 1, 0.2
+            size_hint: 1, None
+            height: 50
             rows: 1
-            columns: 2
+            columns: 3
+            TextInput:
+                id: truth_input
+                text: "Enter Boolean Expression"
+                size_hint: 1, 1
+                multiline: False
+                on_text_validate: root.generate()
             Button:
                 text: 'Cancel'
                 on_release: root.dismiss()
+                size_hint: None, 1
+                width: 100
             Button:
                 text: 'Generate' 
                 on_release: root.generate()
+                size_hint: None, 1
+                width: 100
 
 
 <GridLayout>:
@@ -112,7 +119,7 @@
                     app_icon_width: 0
                 ActionButton:
                     text: "Truth Table"
-                    on_release: Factory.TruthPopup().open()
+                    on_release: Factory.TruthPopup().open(root)
                 ActionButton:
                     text: "Save"
                 ActionButton:
@@ -193,39 +200,95 @@
                         spaceing: 1
                         padding: 1
                         size: self.parent.size
+                        
                         GateLabel:
                             text: "And"
                         GateButton:
                             id: And
                             on_press: root.addGateToCanvas("and")
+
+                            Image:
+                                source: 'Images/GateIcons/and.png'
+                                width: self.parent.width * 0.9
+                                height: self.parent.height * 0.9
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
+                        
                         GateLabel:
                             text: "Or"
                         GateButton:
                             id: Or
                             on_press: root.addGateToCanvas("or")
+
+                            Image:
+                                source: 'Images/GateIcons/or.png'
+                                width: self.parent.width * 0.9
+                                height: self.parent.height * 0.9
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
+                        
                         GateLabel:
                             text: "Not"
                         GateButton:
                             id: Not
                             on_press: root.addGateToCanvas("not")
+
+                            Image:
+                                source: 'Images/GateIcons/not.png'
+                                width: self.parent.width * 0.9
+                                height: self.parent.height * 0.9
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
+                        
                         GateLabel:
                             text: "Xor"
                         GateButton:
                             id: Xor
                             on_press: root.addGateToCanvas("xor")
+
+                            Image:
+                                source: 'Images/GateIcons/xor.png'
+                                width: self.parent.width * 0.9
+                                height: self.parent.height * 0.9
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
+                        
                         GateLabel:
-                            text: "Input"
+                            text: "Switch"
                         GateButton:
                             id: Input
-                            on_press: root.addGateToCanvas("input")
+                            on_press: root.addGateToCanvas("switch")
+                            
+                            Image:
+                                source: 'Images/GateIcons/switch_menu.png'
+                                width: self.parent.width * 0.9
+                                height: self.parent.height * 0.9
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
+                        
                         GateLabel:
                             text: "Output"
                         GateButton:
                             id: Output
                             on_press: root.addGateToCanvas("output")
+
+                            Image:
+                                source: 'Images/GateIcons/output_menu.png'
+                                width: self.parent.width * 0.9
+                                height: self.parent.height * 0.9
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
+                        
                         GateLabel:
                             text: "Clock"
                         GateButton:
                             id: Clock
                             on_press: root.addGateToCanvas("clock")
+
+                            Image:
+                                source: 'Images/GateIcons/clock.png'
+                                width: self.parent.width * 0.9
+                                height: self.parent.height * 0.9
+                                center_x: self.parent.center_x
+                                center_y: self.parent.center_y
                 

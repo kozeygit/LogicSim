@@ -1,6 +1,6 @@
 ## Kivy GUI ##
+from itertools import tee
 import kivy, os, sys
-import logging
 kivy.require('2.0.0')
 from kivy.app import App
 from kivy.config import Config
@@ -31,21 +31,36 @@ class ExitPopup(Popup):
         sys.exit()
 
 class TruthPopup(Popup):
+    def open(self, root, *args, **kwargs):
+        super().open(*args, **kwargs)
+        selectedGate = root.ids["gateCanvas"].getSelectedGates()
+        if len(selectedGate) != 1:
+            text = 'Enter Boolean Expression Here'
+        else:
+            text = selectedGate[0].logic_gate.getExpression()
+        self.ids["truth_input"].text = text
+        self.generate()
+
     def generate(self):
         input = self.ids["truth_input"].text 
         out = generateTruthTable(input)
-        
-        self.ids["truth_label"].text = input
+        out2 = truth_dict_to_string(*out)
+        self.ids["truth_label"].text = out2
         print("TRUTH TABLE GENERATED\n"*5)
 
 class ConnectionLine(Widget):
-    def __init__(self, outGate, inGate, inNode):
-        self.out_gate = outGate
-        self.in_gate = inGate
-        self.in_gate_node = inNode
-        self.state = None
-        self.line = Line()
-    pass
+    out_pos = NumericProperty()
+    
+
+    def setState(self, state):
+        pass
+
+    def setInPos(self, pos):
+        pass
+
+    def setOutPos(self, pos):
+        pass
+
 
 
 class GateCanvas(FloatLayout):
@@ -63,7 +78,7 @@ class GateCanvas(FloatLayout):
             "or":DragOrGate,
             "not":DragNotGate,
             "xor":DragXorGate,
-            "input":DragSwitch,
+            "switch":DragSwitch,
             "output":DragOutput,
             "clock":None
         }
@@ -111,24 +126,28 @@ class GateCanvas(FloatLayout):
                     self.in_connection = (node, child)
                 child.selectNode(node)
                 
-                in_gate = self.in_connection[1]
-                out_gate = self.out_connection[1]
-                in_node = self.in_connection[0]
-                self.board.connectGate(in_gate.getLogicGate(), out_gate.getLogicGate(), node=in_node)
-                self.connection_lines.append(Line(points=(in_gate.pos, out_gate.pos)))
-                self.canvas.add(self.connection_lines[-1])
-                self.updateStates()
-                
-                self.out_connection = None
-                self.in_connection = None
-                return True
-            
+                if self.in_connection is None:
+                    print("Can't connect output to output")
+                elif self.out_connection is None:
+                    print("Cant connect input to input")
+                else:
+                    in_gate = self.in_connection[1]
+                    out_gate = self.out_connection[1]
+                    in_node = self.in_connection[0]
+                    self.board.connectGate(in_gate.getLogicGate(), out_gate.getLogicGate(), node=in_node)
+                    self.connection_lines.append(Line(points=(in_gate.pos, out_gate.pos)))
+                    self.canvas.add(self.connection_lines[-1])
+                    self.updateStates()
+                        
+        for child in self.gates[:]:
+            child.deselectNodes()
+
         self.out_connection = None
         self.in_connection = None
         return True
 
     def move_down(self, touch):
-        for child in self.gates[:]:
+        for child in self.gates[::-1]:
             if child.dispatch('on_touch_down', touch):
                 return True
         if not self.collide_point(*touch.pos):
@@ -256,6 +275,10 @@ class DragGate(DragBehavior, FloatLayout):
         node = self.getNode(node_index)
         node.color = (1, 1, 1, 1)
     
+    def deselectNodes(self):
+        for node in self.nodes:
+            node.color = (1, 1, 1, 1)
+
     def getNode(self, index):
         if index == 1:
             return self.in_node_1

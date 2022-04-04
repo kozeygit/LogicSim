@@ -59,9 +59,9 @@ def generateTruthTable(expression):
     if final_dictionary == "Error":
         return "Invalid Input"
     else:
-        return (input_expression, final_dictionary)
+        return (final_dictionary, input_expression)
 
-def truth_dict_to__string(final_dictionary, input_expression):
+def truth_dict_to_string(final_dictionary, input_expression):
     final_string = ''
     final_string = final_string + str("Boolean Expression: " + input_expression.upper() + "\n")
     for i in final_dictionary:
@@ -70,7 +70,7 @@ def truth_dict_to__string(final_dictionary, input_expression):
         else:
             final_string = final_string + (f"| {i} ")
     final_string = final_string + ('|\n')
-    for i in range(len(variable_permutations)):
+    for i in range(len(final_dictionary['OUT'])):
         for ii in final_dictionary:
             final_string = final_string + (f"| {final_dictionary[ii][i]} ")
         final_string = final_string + ('|\n')
