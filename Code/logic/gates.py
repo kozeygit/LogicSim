@@ -244,7 +244,7 @@ class Switch:
 
     def flip(self):
         self._output = int(not(self._output))
-        print(self._output_nodes)
+        #print(self._output_nodes)
 
     def getName(self):
         return self.name

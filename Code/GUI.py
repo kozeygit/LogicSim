@@ -6,19 +6,14 @@ from kivy.app import App
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.graphics import Color, Line, Rectangle, RoundedRectangle, Ellipse
-from kivy.graphics.svg import Svg
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, NumericProperty, BooleanProperty
+from kivy.properties import ObjectProperty, NumericProperty, BooleanProperty, ListProperty
 from kivy.uix.behaviors import DragBehavior
 from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.scatterlayout import ScatterLayout
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
 from logic.board import Board
 from logic.gates import *
@@ -52,20 +47,40 @@ class TruthPopup(Popup):
             self.ids["truth_label"].text = f"{out[1]}\n{out2}"
 
 class ConnectionLine(Widget):
-    out_pos = NumericProperty()
+    color_state = ListProperty()
+    def __init__(self, out_gate, in_gate, in_node, **kwargs):
+        super().__init__(**kwargs)
+        self.states = {None:(1,1,1,1), 0:(1,0,0,1), 1:(0,1,0,1)}
+        self.color_state = (1,1,1,1)
+        self.out_gate = out_gate
+        self.in_gate = in_gate
+        self.in_node = in_node
+        self.points = []
+        self.state = None
+        self.line = Line(points=self.points, width=5)
+        self.canvas.add(self.line)
+        self.updatePos()
+        self.updateState()
 
-    def setState(self, state):
-        pass
+    def getTurnPoints(self, out_node_pos, in_node_pos):
+        x1 = out_node_pos[0]
+        x2 = in_node_pos[0]
+        y1 = out_node_pos[1]
+        y2 = in_node_pos[1]
+        x_mid = (x1 + x2)/2
+        turn1 = [x_mid, y1]
+        turn2 = [x_mid, y2]
+        return turn1 + turn2
 
-    def setInPos(self, pos):
-        pass
+    def updateState(self):
+        self.state = self.out_gate.getState()
+        self.color_state = self.states[self.state]
 
-    def setOutPos(self, pos):
-        pass
-
-    def addMidPoint(self):
-        pass
-
+    def updatePos(self):
+        out_node_pos = self.out_gate.getNodePos(-1)
+        in_node_pos = self.in_gate.getNodePos(self.in_node)
+        self.points = out_node_pos + self.getTurnPoints(out_node_pos, in_node_pos) + in_node_pos
+        self.line.points = self.points
 
 
 class GateCanvas(FloatLayout):
@@ -88,14 +103,17 @@ class GateCanvas(FloatLayout):
             "clock":None
         }
 
+    def updateConnections(self):
+        for i in self.connection_lines[:]:
+            i.updatePos()
+
     def updateStates(self):
-        print("updating")
         for i in self.gates:
+            i.updateState()
+        for i in self.connection_lines:
             i.updateState()
     
     # i have no idea how to do this??
-    def addConnectionLine(self, exit_gate, input_gate, input_node):
-        line = ConnectionLine()
     
     def setTool(self, tool):
         self.tool = tool
@@ -105,7 +123,6 @@ class GateCanvas(FloatLayout):
         else:
             for i in self.gates[:]:
                 i.hideNodes()
-
         
     def connect_down(self, touch):
         if not self.collide_point(*touch.pos):
@@ -120,7 +137,6 @@ class GateCanvas(FloatLayout):
                 child.selectNode(node)
                 return True
         return True
-
 
     def connect_up(self, touch):
         for child in self.gates[:]:
@@ -139,9 +155,10 @@ class GateCanvas(FloatLayout):
                     in_gate = self.in_connection[1]
                     out_gate = self.out_connection[1]
                     in_node = self.in_connection[0]
-                    self.board.connectGate(in_gate.getLogicGate(), out_gate.getLogicGate(), node=in_node)
-                    self.connection_lines.append(Line(points=(in_gate.pos, out_gate.pos)))
-                    self.canvas.add(self.connection_lines[-1])
+                    if self.board.connectGate(in_gate.getLogicGate(), out_gate.getLogicGate(), node=in_node):
+                        line = ConnectionLine(out_gate, in_gate, in_node)
+                        self.connection_lines.append(line)
+                        self.add_widget(line)
                     self.updateStates()
                         
         for child in self.gates[:]:
@@ -243,11 +260,14 @@ class DragGate(DragBehavior, FloatLayout):
         self.select()
         #print(self.parent)
 
+    def getNodePos(self, node):
+        return self.getNode(node).center
+
     def nodes_init(self):
         node_source="Images/GateIcons/node.png"
-        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.top-29), size_hint=(None, None), size=(12,12))
-        self.in_node_2 = Image(source=node_source, pos=(self.x-6, self.y+18), size_hint=(None, None), size=(12,12))
-        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
+        self.in_node_2 = Image(source=node_source, size_hint=(None, None), size=(20,20))
+        self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.nodes.append(self.in_node_1)
         self.nodes.append(self.in_node_2)
         self.nodes.append(self.out_node)
@@ -257,9 +277,9 @@ class DragGate(DragBehavior, FloatLayout):
         self.hideNodes() 
 
     def updateNodes(self):
-        self.in_node_1.pos=(self.x-6, self.top-29)
-        self.in_node_2.pos=(self.x-6, self.y+18)
-        self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
+        self.in_node_1.center=(self.x, self.center_y+26)
+        self.in_node_2.center=(self.x, self.center_y-26)
+        self.out_node.center=(self.right, self.center_y+2)
 
     def getNodeCollide(self, touch):
         for i in self.nodes:
@@ -296,7 +316,8 @@ class DragGate(DragBehavior, FloatLayout):
         try:
             self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)
             self.img.pos = self.pos
-        #self.nodes
+            self.updateNodes()
+            self.parent.updateConnections()
         except AttributeError as e:
             print("Gate not made yet", e)
 
@@ -359,8 +380,11 @@ class DragGate(DragBehavior, FloatLayout):
 
     def updateState(self):
         x = self.logic_gate.getOutput()
-        print(self, "I AM UPDATING", x)
+        #print(self, "I AM UPDATING", x)
         self.state = x
+
+    def getState(self):
+        return self.state
 
 class DragSwitch(DragGate):
     def __init__(self, **kwargs):
@@ -371,13 +395,13 @@ class DragSwitch(DragGate):
 
     def nodes_init(self):
         node_source="Images/GateIcons/node.png"
-        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(20,20))
+        self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.out_node)
         self.nodes.append(self.out_node)
         self.hideNodes() 
 
     def updateNodes(self):
-        self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
+        self.out_node.center=(self.right, self.y+(self.height//2))
 
     def getNodeCollide(self, touch):
         for i in self.nodes:
@@ -391,7 +415,7 @@ class DragSwitch(DragGate):
         if self.dragged:
             return super().on_touch_up(touch)
         elif (touch.pos[0] < self.right - 30) and (touch.pos[0] > self.x + 10) and (touch.pos[1] < self.top - 20) and (touch.pos[1] > self.y + 20):
-            print("BUTTTON PRESSED, I REPEAT BUTTON PRESSED", self.dragged)
+            #print("BUTTTON PRESSED, I REPEAT BUTTON PRESSED", self.dragged)
             self.logic_gate.flip()
             self.updateState()
             self.parent.updateStates()
@@ -400,7 +424,7 @@ class DragSwitch(DragGate):
     
     def updateState(self):
         x = self.logic_gate.getOutput()
-        print(self, "I AM UPDATING", x)
+        #print(self, "I AM UPDATING", x)
         self.state = x
         self.img.source = self.states[self.state]
 
@@ -413,13 +437,13 @@ class DragOutput(DragGate):
 
     def nodes_init(self):
         node_source="Images/GateIcons/node.png"
-        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.in_node_1)
         self.nodes.append(self.in_node_1)
         self.hideNodes()
 
     def updateNodes(self):
-        self.in_node_1.pos=(self.x-6, self.y+(self.height//2)-4)
+        self.in_node_1.center=(self.x, self.center_y)
 
     def getNodeCollide(self, touch):
         for i in self.nodes:
@@ -430,7 +454,7 @@ class DragOutput(DragGate):
 
     def updateState(self):
         x = self.logic_gate.getOutput()
-        print(self, "I AM UPDATING", x)
+        #print(self, "I AM UPDATING", x)
         self.state = x
         self.img.source = self.states[self.state]
 
@@ -461,8 +485,8 @@ class DragNotGate(DragGate):
 
     def nodes_init(self):
         node_source="Images/GateIcons/node.png"
-        self.in_node_1 = Image(source=node_source, pos=(self.x-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
-        self.out_node = Image(source=node_source, pos=(self.right-6, self.y+(self.height//2)-4), size_hint=(None, None), size=(12,12))
+        self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
+        self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.in_node_1)
         self.add_widget(self.out_node)
         self.nodes.append(self.in_node_1)
@@ -470,8 +494,8 @@ class DragNotGate(DragGate):
         self.hideNodes()
 
     def updateNodes(self):
-        self.in_node_1.pos=(self.x-6, self.y+(self.height//2)-4)
-        self.out_node.pos=(self.right-6, self.y+(self.height//2)-4)
+        self.in_node_1.center=(self.x, self.center_y+2)
+        self.out_node.center=(self.right, self.center_y+2)
 
     def getNodeCollide(self, touch):
         for i in self.nodes:

@@ -24,6 +24,7 @@ class Board:
             if inGate.getGateType() != "not" or inGate.getGateType() != "output":
                 if inGate.connectNode(outGate, 2):
                     return True
+        print("DIDNT WORK NO LINE SHOULD APPEAR")
         return False
 
     def disconnectGate(self, gate1, gate2):
@@ -31,5 +32,5 @@ class Board:
 
     def clearBoard(self):
         for i in self.gates[:]:
-            print(len(self.gates))
+            #print(len(self.gates))
             self.removeGate(i)
