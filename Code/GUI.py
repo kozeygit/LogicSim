@@ -57,8 +57,11 @@ class ConnectionLine(Widget):
         self.in_node = in_node
         self.points = []
         self.state = None
-        self.line = Line(points=self.points, width=5)
-        self.canvas.add(self.line)
+        self.inline = Line(points=self.points, width=1.5, cap='round', joint='round')
+        self.outline = Line(points=self.points, width=4, cap='round', joint='round')
+        self.canvas.add(self.inline)
+        self.canvas.before.add(Color(rgba=(0,0,0,1)))
+        self.canvas.before.add(self.outline)
         self.updatePos()
         self.updateState()
 
@@ -80,7 +83,8 @@ class ConnectionLine(Widget):
         out_node_pos = self.out_gate.getNodePos(-1)
         in_node_pos = self.in_gate.getNodePos(self.in_node)
         self.points = out_node_pos + self.getTurnPoints(out_node_pos, in_node_pos) + in_node_pos
-        self.line.points = self.points
+        self.outline.points = self.points
+        self.inline.points = self.points
 
 
 class GateCanvas(FloatLayout):

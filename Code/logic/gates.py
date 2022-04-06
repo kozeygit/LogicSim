@@ -9,7 +9,7 @@ class Gate: #Logic gates parent class
     def __init__(self):
         self._input_nodes = [None, None]
         self._output_nodes = []
-        self._output = 0 
+        self._output = None
         self._type = ''
         self._expression = None
         self.name = ''
@@ -90,8 +90,12 @@ class Gate: #Logic gates parent class
         if self.hasInput():
             var1 = self._input_nodes[0].getOutput()
             var2 = self._input_nodes[1].getOutput()
-            self._output = self.evaluate(var1, var2)
+            if var1 == None or var2 == None:
+                self._output = None
+            else:
+                self._output = self.evaluate(var1, var2)
         else:
+            self._output = None
             print("Gate is missing input(s)")
             print(self._input_nodes[0])
             print(self._input_nodes[1])
@@ -173,7 +177,12 @@ class Not_Gate(Gate):
     def _process(self):
         if self.hasInput():
             var1 = self._input_nodes[0].getOutput()
-            self._output = self.evaluate(var1)
+            if var1 == None:
+                self._output = None
+            else:
+                self._output = self.evaluate(var1)
+        else:
+            self._output = None
     
     def connectNode(self, gate, node):
         if node == 1:
@@ -207,10 +216,6 @@ class Not_Gate(Gate):
 
     def updateExpression(self):
         if self.hasInput():
-            if self._input_nodes[0].getGateType() == 'switch':
-                exp1 = self._input_nodes[0].getExpression()
-            else:
-                exp1 = f"({self._input_nodes[0].getExpression()})"
             self._expression = str(f"{self._type}({self._input_nodes[0].getExpression()})")
         else:
             self._expression = None
