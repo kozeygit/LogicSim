@@ -48,7 +48,7 @@
             on_release: root.dismiss()
         Button:
             text: 'Quit'
-            on_release: root.closeWindow()
+            on_release: root.close_window()
 
 <TruthPopup>:
     auto_dismiss: True
@@ -153,24 +153,24 @@
                     id: connectToggle
                     group: "tools"
                     text: "Connect"
-                    on_press: root.setTool("connect")
+                    on_press: root.set_tool("connect")
                 ToolToggleButton:
                     id: disconnectToggle
                     group: "tools"
                     text: "Disconnect"
-                    on_press: root.setTool("disconnect")
+                    on_press: root.set_tool("disconnect")
                 ToolToggleButton:
                     id: moveToggle
                     state: "down"
                     group: "tools"
                     text: "Move"
-                    on_press: root.setTool("move")
+                    on_press: root.set_tool("move")
                 ToolButton:
                     text: "Delete"
-                    on_press: root.deleteGates()
+                    on_press: root.delete_gate()
                 ToolButton:
                     text: "Clear"
-                    on_press: root.clearCanvas()
+                    on_press: root.clear_canvas()
                 Label:
                     id: toolLabel
                     color: 0,0,0,1
@@ -214,7 +214,7 @@
                             text: "And"
                         GateButton:
                             id: And
-                            on_press: root.addGateToCanvas("and")
+                            on_press: root.add_gate("and")
 
                             Image:
                                 source: 'Images/GateIcons/and.png'
@@ -227,7 +227,7 @@
                             text: "Or"
                         GateButton:
                             id: Or
-                            on_press: root.addGateToCanvas("or")
+                            on_press: root.add_gate("or")
 
                             Image:
                                 source: 'Images/GateIcons/or.png'
@@ -240,7 +240,7 @@
                             text: "Not"
                         GateButton:
                             id: Not
-                            on_press: root.addGateToCanvas("not")
+                            on_press: root.add_gate("not")
 
                             Image:
                                 source: 'Images/GateIcons/not.png'
@@ -253,7 +253,7 @@
                             text: "Xor"
                         GateButton:
                             id: Xor
-                            on_press: root.addGateToCanvas("xor")
+                            on_press: root.add_gate("xor")
 
                             Image:
                                 source: 'Images/GateIcons/xor.png'
@@ -266,7 +266,7 @@
                             text: "Switch"
                         GateButton:
                             id: Input
-                            on_press: root.addGateToCanvas("switch")
+                            on_press: root.add_gate("switch")
                             
                             Image:
                                 source: 'Images/GateIcons/switch_menu.png'
@@ -279,7 +279,7 @@
                             text: "Output"
                         GateButton:
                             id: Output
-                            on_press: root.addGateToCanvas("output")
+                            on_press: root.add_gate("output")
 
                             Image:
                                 source: 'Images/GateIcons/output_menu.png'
@@ -292,7 +292,7 @@
                             text: "Clock"
                         GateButton:
                             id: Clock
-                            on_press: root.addGateToCanvas("clock")
+                            on_press: root.add_gate("clock")
 
                             Image:
                                 source: 'Images/GateIcons/clock.png'

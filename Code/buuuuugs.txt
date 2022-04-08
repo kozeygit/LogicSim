@@ -1,0 +1,7 @@
+BUGS:
+- When deleting a not gate, the gate its going into does not reset its node
+- Sometimes the truth table just fails, dno why
+- Draggin the gates to the border has all sorts of issues
+
+TODO:
+- add disconnect method to gate canvas class

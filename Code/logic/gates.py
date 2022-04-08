@@ -1,6 +1,6 @@
 
 '''
-Gates Vectors Needed: And, Or, Xor, Not, Switch(on, off), Output(on, off)
+Gates Vectors Needed: And, Or, Xor, Not, Switch(on, off, both), Output(on, off, empty, both), clock?
 '''
 
 class Gate: #Logic gates parent class
@@ -81,8 +81,8 @@ class Gate: #Logic gates parent class
             self._input_nodes[1].disconnectNode(self)
             self._input_nodes[1] = None
             self.updateExpression()
-        for i in self._output_nodes:
-            i.disconnectNode(self)
+        for gate in self._output_nodes:
+            gate.disconnectNode(self)
         
     
   # doesnt handle flip flop recursion
@@ -209,7 +209,7 @@ class Not_Gate(Gate):
             return False
 
     def disconnectAll(self): # Use when deleting gate
-        if not self._input_nodes[0] == None:
+        if self._input_nodes[0] != None:
             self._input_nodes[0].disconnectNode(self)
             self._input_nodes[0] = None
             self.updateExpression()
