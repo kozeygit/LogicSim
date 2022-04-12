@@ -66,6 +66,9 @@ class ConnectionLine(Widget):
         self.update_pos()
         self.update_state()
         
+    def collide_line(self, x, y):
+        print(self.points)
+        
     def get_gates(self):
         return (self.out_gate, self.in_gate)
 
@@ -194,8 +197,12 @@ class GateCanvas(FloatLayout):
             #print(self.board.gates)
             if self.tool == "connect":
                 return self.connect_down(touch)
+            
             if self.tool == "disconect":
-                pass
+                for line in self.connection_lines:
+                    line.collide_line(*touch.pos)
+                    print(line)
+            
             if self.tool == "move":
                 return self.move_down(touch)
 
