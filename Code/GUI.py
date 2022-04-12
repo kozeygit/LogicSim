@@ -82,6 +82,9 @@ class ConnectionLine(Widget):
         
     def get_gates(self):
         return (self.out_gate, self.in_gate)
+    
+    def get_nodes(self):
+        return ((self.out_gate, -1), (self.in_gate, self.in_node))
 
     def get_turn_points(self, out_node_pos, in_node_pos):
         x1 = out_node_pos[0]
@@ -126,7 +129,7 @@ class GateCanvas(FloatLayout):
             "clock":None
         }
 
-    def update_connections(self):
+    def update_connection_lines(self):
         for line in self.connection_lines[:]:
             line.update_pos()
 
@@ -146,8 +149,6 @@ class GateCanvas(FloatLayout):
                 gate.hode_nodes()
         
     def connect_down(self, touch):
-        if not self.collide_point(*touch.pos):
-            return False
         self.deselect_gates()
         for gate in self.gates[:]:
             if node := gate.get_node_collide(touch):
@@ -199,6 +200,29 @@ class GateCanvas(FloatLayout):
             return False
         self.deselect_gates()
         return True
+    
+    def disconnect_down(self, touch):
+        self.deselect_gates()
+        for gate in self.gates[:]:
+            if node := gate.get_node_collide(touch):
+                if node == -1:
+                    for line in self.connection_lines:
+                        gate_node_tuple = line.get_nodes()
+                        if gate_node_tuple[0][0] == gate:
+                            gate2 = gate_node_tuple[1][0]
+                            self.board.disconnectGate(gate2.get_logic_gate(), gate.get_logic_gate())
+                            self.connection_lines.remove(line)
+                            self.remove_widget(line)
+                elif node == 1 or node == 2:
+                    for line in self.connection_lines:
+                        gate_node_tuple = line.get_nodes()
+                        if gate_node_tuple[1] == (gate,node):
+                            gate2 = gate_node_tuple[0][0]
+                            self.board.disconnectGate(gate.get_logic_gate(), gate2.get_logic_gate())
+                            self.connection_lines.remove(line)
+                            self.remove_widget(line)
+        self.update_states()        
+        return True
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos): 
@@ -209,10 +233,8 @@ class GateCanvas(FloatLayout):
             if self.tool == "connect":
                 return self.connect_down(touch)
             
-            if self.tool == "disconect":
-                for line in self.connection_lines:
-                    line.collide_line(*touch.pos)
-                    print(line)
+            if self.tool == "disconnect":
+                return self.disconnect_down(touch)
             
             if self.tool == "move":
                 return self.move_down(touch)
@@ -221,10 +243,10 @@ class GateCanvas(FloatLayout):
         if self.collide_point(*touch.pos):
             if self.tool == "connect":
                 return self.connect_up(touch)
-            if self.tool == "disconect":
+            if self.tool == "disconnect":
                 pass
             if self.tool == "move":
-                return super().on_touch_up(touch)
+                pass
         return super().on_touch_up(touch)
    
     
@@ -255,7 +277,6 @@ class GateCanvas(FloatLayout):
                     if gate in line.get_gates():
                         self.connection_lines.remove(line)
                         self.remove_widget(line)
-                        print(line, gate)
                 
                 self.board.removeGate(gate.get_logic_gate())
                 self.remove_widget(gate)

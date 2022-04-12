@@ -27,8 +27,8 @@ class Board:
         print("DIDNT WORK NO LINE SHOULD APPEAR")
         return False
 
-    def disconnectGate(self, gate1, gate2):
-        return gate1.disconnectNode(gate2)
+    def disconnectGate(self, inGate, outGate):
+        return inGate.disconnectNode(outGate)
 
     def clearBoard(self):
         for i in self.gates[:]:
