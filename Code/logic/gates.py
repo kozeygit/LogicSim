@@ -133,7 +133,6 @@ class Gate: #Logic gates parent class
 
 
 class And_Gate(Gate):
-    
     def __init__(self):
         super().__init__()
         self._type = 'and'

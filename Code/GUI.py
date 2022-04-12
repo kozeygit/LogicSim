@@ -1,5 +1,6 @@
 ## Kivy GUI ##
 import sys
+import platform
 import kivy
 kivy.require('2.0.0')
 
@@ -8,7 +9,7 @@ from kivy.config import Config
 from kivy.core.window import Window
 from kivy.graphics import Color, Line
 from kivy.lang import Builder
-from kivy.properties import ListProperty
+from kivy.properties import ListProperty, StringProperty
 from kivy.uix.behaviors import DragBehavior
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
@@ -22,11 +23,21 @@ from logic.truth_table import *
 
 Window.maximize()
 
+
+
 class ExitPopup(Popup):
     def close_window(self):
         sys.exit()
 
 class TruthPopup(Popup):
+    FONT = StringProperty()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if platform.system() == "Linux":
+            self.FONT = "FreeMonoBold"
+        else:
+            self.FONT = "LUCON"
+        
     def open(self, root, *args, **kwargs):
         super().open(*args, **kwargs)
         selectedGate = root.ids["gateCanvas"].get_selected_gates()
@@ -529,7 +540,7 @@ class MainWindow(Widget):
         super().__init__(**kwargs)
         self.ids["gateCanvas"].root = self
         self.toggles = ["connectToggle", "moveToggle", "disconnectToggle"]
-
+        
     def set_tool(self, tool):
         self.ids["gateCanvas"].set_tool(tool)
         self.ids["toolLabel"].text = tool
