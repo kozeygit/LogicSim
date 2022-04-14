@@ -5,6 +5,7 @@ import kivy
 kivy.require('2.0.0')
 
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.graphics import Color, Line
@@ -77,9 +78,6 @@ class ConnectionLine(Widget):
         self.update_pos()
         self.update_state()
         
-    def collide_line(self, x, y):
-        print(self.points)
-        
     def get_gates(self):
         return (self.out_gate, self.in_gate)
     
@@ -126,7 +124,7 @@ class GateCanvas(FloatLayout):
             "xor":DragXorGate,
             "switch":DragSwitch,
             "output":DragOutput,
-            "clock":None
+            "clock":DragClock
         }
 
     def update_connection_lines(self):
@@ -146,7 +144,7 @@ class GateCanvas(FloatLayout):
                 gate.show_nodes()
         else:
             for gate in self.gates[:]:
-                gate.hode_nodes()
+                gate.hide_nodes()
         
     def connect_down(self, touch):
         self.deselect_gates()
@@ -277,10 +275,12 @@ class GateCanvas(FloatLayout):
                     if gate in line.get_gates():
                         self.connection_lines.remove(line)
                         self.remove_widget(line)
+                        del line
                 
                 self.board.removeGate(gate.get_logic_gate())
                 self.remove_widget(gate)
                 self.gates.remove(gate)
+                del gate
                 self.update_states()
 
     def clear_canvas(self):
@@ -327,7 +327,7 @@ class DragGate(DragBehavior, FloatLayout):
         self.add_widget(self.in_node_1)
         self.add_widget(self.in_node_2)
         self.add_widget(self.out_node)
-        self.hode_nodes() 
+        self.hide_nodes() 
 
     def get_node_pos(self, node):
         return self.get_node(node).center
@@ -373,7 +373,7 @@ class DragGate(DragBehavior, FloatLayout):
             self.border.rounded_rectangle = (self.x, self.y, self.width, self.height, 10)
             self.img.pos = self.pos
             self.update_nodes()
-            self.parent.update_connections()
+            self.parent.update_connection_lines()
         except AttributeError as e:
             print("Gate not finished initalising", e)
 
@@ -386,7 +386,7 @@ class DragGate(DragBehavior, FloatLayout):
             i.disabled = False
         self.update_nodes()
 
-    def hode_nodes(self):
+    def hide_nodes(self):
         for i in self.nodes:
             i.opacity = 0
             i.disabled = True
@@ -454,7 +454,7 @@ class DragSwitch(DragGate):
         self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.out_node)
         self.nodes.append(self.out_node)
-        self.hode_nodes() 
+        self.hide_nodes() 
 
     def update_nodes(self):
         self.out_node.center=(self.right, self.y+(self.height//2))
@@ -484,6 +484,59 @@ class DragSwitch(DragGate):
         self.state = x
         self.img.source = self.states[self.state]
 
+class DragClock(DragGate):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.logic_gate = Switch()
+        
+        self.states = {1:"Images/GateIcons/clock_on.png", 0:"Images/GateIcons/clock_off.png"}
+        self.img.source = self.states[self.logic_gate.getOutput()]
+        Clock.schedule_interval(self.clock_flip, 1)
+
+    def clock_flip(self, *args):
+        self.logic_gate.flip()
+        self.update_state()
+        try:
+            self.parent.update_states()
+        except AttributeError as e:
+            print("Clock must have been deleted")
+            Clock.unschedule(self.clock_flip)
+
+    def nodes_init(self):
+        node_source="Images/GateIcons/node.png"
+        self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
+        self.add_widget(self.out_node)
+        self.nodes.append(self.out_node)
+        self.hide_nodes()
+
+    def update_nodes(self):
+        self.out_node.center=(self.right, self.y+(self.height//2))
+
+    def get_node_collide(self, touch):
+        for i in self.nodes:
+            if i.collide_point(*touch.pos):
+                if i == self.out_node:
+                    return -1
+        return False
+
+    #CHANGEEEEEE
+    def on_touch_up(self, touch):
+        if self.dragged:
+            return super().on_touch_up(touch)
+        elif (touch.pos[0] < self.right - 30) and (touch.pos[0] > self.x + 10) and (touch.pos[1] < self.top - 20) and (touch.pos[1] > self.y + 20):
+            #print("BUTTTON PRESSED, I REPEAT BUTTON PRESSED", self.dragged)
+            self.logic_gate.flip()
+            self.update_state()
+            self.parent.update_states()
+            return True
+        return super().on_touch_up(touch)
+    
+    def update_state(self):
+        x = self.logic_gate.getOutput()
+        #print(self, "I AM UPDATING", x)
+        self.state = x
+        self.img.source = self.states[self.state]
+
 class DragOutput(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -496,7 +549,7 @@ class DragOutput(DragGate):
         self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.in_node_1)
         self.nodes.append(self.in_node_1)
-        self.hode_nodes()
+        self.hide_nodes()
 
     def update_nodes(self):
         self.in_node_1.center=(self.x, self.center_y)
@@ -547,7 +600,7 @@ class DragNotGate(DragGate):
         self.add_widget(self.out_node)
         self.nodes.append(self.in_node_1)
         self.nodes.append(self.out_node)
-        self.hode_nodes()
+        self.hide_nodes()
 
     def update_nodes(self):
         self.in_node_1.center=(self.x, self.center_y+2)
@@ -596,7 +649,7 @@ kv = Builder.load_file("test.kv")
 
 class LogicGateSimulator(App):
     def build(self):
-        #self.icon = "Images/Me.jpg"
+        self.icon = "Images/GateIcons/and.png"
         return MainWindow()
 
 if __name__ == '__main__':

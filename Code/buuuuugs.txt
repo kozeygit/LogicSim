@@ -5,6 +5,13 @@ BUGS:
 - make a full adder, bottom outputs expression is wrong
 
 TODO:
-- add disconnect method to gate canvas class
+- add disconnect method to gate canvas class /
 - save load maybe
 - add clock
+
+
+
+
+
+
+and do the darn documentations
