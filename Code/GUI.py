@@ -352,7 +352,7 @@ class DragGate(DragBehavior, FloatLayout):
         #print(self.parent)
     
     def nodes_init(self):
-        node_source="Images/GateIcons/node.png"
+        node_source="GateIcons/node.png"
         self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.in_node_2 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
@@ -481,11 +481,11 @@ class DragSwitch(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.logic_gate = Switch()
-        self.states = {1:"Images/GateIcons/switch_on.png", 0:"Images/GateIcons/switch_off.png"}
+        self.states = {1:"GateIcons/switch_on.png", 0:"GateIcons/switch_off.png"}
         self.img.source = self.states[self.logic_gate.getOutput()]
 
     def nodes_init(self):
-        node_source="Images/GateIcons/node.png"
+        node_source="GateIcons/node.png"
         self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.out_node)
         self.nodes.append(self.out_node)
@@ -524,7 +524,7 @@ class DragClock(DragGate):
         super().__init__(**kwargs)
         self.logic_gate = Switch()
         
-        self.states = {1:"Images/GateIcons/clock_on.png", 0:"Images/GateIcons/clock_off.png"}
+        self.states = {1:"GateIcons/clock_on.png", 0:"GateIcons/clock_off.png"}
         self.img.source = self.states[self.logic_gate.getOutput()]
         Clock.schedule_interval(self.clock_flip, 1)
 
@@ -538,7 +538,7 @@ class DragClock(DragGate):
             Clock.unschedule(self.clock_flip)
 
     def nodes_init(self):
-        node_source="Images/GateIcons/node.png"
+        node_source="GateIcons/node.png"
         self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.out_node)
         self.nodes.append(self.out_node)
@@ -564,11 +564,11 @@ class DragOutput(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.logic_gate = Output()
-        self.states = {1:"Images/GateIcons/output_on.png", 0:"Images/GateIcons/output_off.png", None:"Images/GateIcons/output_empty.png"}
+        self.states = {1:"GateIcons/output_on.png", 0:"GateIcons/output_off.png", None:"GateIcons/output_empty.png"}
         self.update_state()
 
     def nodes_init(self):
-        node_source="Images/GateIcons/node.png"
+        node_source="GateIcons/node.png"
         self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.in_node_1)
         self.nodes.append(self.in_node_1)
@@ -594,30 +594,30 @@ class DragOutput(DragGate):
 class DragAndGate(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.img.source = "Images/GateIcons/and.png"
+        self.img.source = "GateIcons/and.png"
         self.logic_gate = And_Gate()
 
 class DragOrGate(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.img.source = "Images/GateIcons/or.png"
+        self.img.source = "GateIcons/or.png"
         self.logic_gate = Or_Gate()
 
 class DragXorGate(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.img.source = "Images/GateIcons/xor.png"
+        self.img.source = "GateIcons/xor.png"
         self.logic_gate = Xor_Gate()
 
 class DragNotGate(DragGate):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.img.source = "Images/GateIcons/not.png"
+        self.img.source = "GateIcons/not.png"
         self.logic_gate = Not_Gate()
 
     def nodes_init(self):
-        node_source="Images/GateIcons/node.png"
+        node_source="GateIcons/node.png"
         self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.in_node_1)
@@ -681,7 +681,7 @@ kv = Builder.load_file("LogicSim.kv")
 class LogicGateSimulator(App):
     '''Builds the kivy app'''
     def build(self):
-        self.icon = "Images/GateIcons/and.png"
+        self.icon = "GateIcons/and.png"
         return MainWindow()
 
 if __name__ == '__main__':

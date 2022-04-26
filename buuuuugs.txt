@@ -1,0 +1,14 @@
+BUGS:
+- When deleting a not gate, the gate its going into does not reset its node. | FIXED
+- Sometimes the truth table just fails, dno why???? | Cant replicate, might be implementation is very inefficient so cant handle many variables
+- Draggin the gates to the border has all sorts of issues. | Seems ok now
+- make a full adder, bottom outputs expression is wrong??? | cant replicate
+
+TODO:
+- add disconnect method to gate canvas class. | DONE
+- save load maybe. | no chance mate.
+- add clock. | kinda, need to make clocks sync.
+
+
+
+and do the darn documentations <<<!!!!!!!<!11!!!1!1!!!
