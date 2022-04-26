@@ -1,3 +1,5 @@
+'''Doctrings Incomplete'''
+
 ## Kivy GUI ##
 import sys
 import platform
@@ -25,12 +27,15 @@ from logic.truth_table import *
 Window.maximize()
 
 
-
 class ExitPopup(Popup):
+    '''Popup that opens when quit button is pressed.'''
     def close_window(self):
+        '''Exits program.'''
         sys.exit()
 
+
 class TruthPopup(Popup):
+    '''Popup for truth table generator.'''
     FONT = StringProperty()
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,26 +45,32 @@ class TruthPopup(Popup):
             self.FONT = "LUCON"
         
     def open(self, root, *args, **kwargs):
+        '''Overwrite of kivy method, inserts selected components expression into input field.'''
         super().open(*args, **kwargs)
-        selectedGate = root.ids["gateCanvas"].get_selected_gates()
-        if len(selectedGate) != 1:
+        selected_gate = root.ids["gateCanvas"].get_selected_gates()
+        if len(selected_gate) != 1:
             text = 'Enter Boolean Expression Here'
         else:
-            text = selectedGate[0].logic_gate.getExpression()
+            text = selected_gate[0].logic_gate.getExpression()
         self.ids["truth_input"].text = text
         self.generate()
 
     def generate(self):
-        input = self.ids["truth_input"].text 
-        out = generateTruthTable(input)
+        '''Using expression in input field, generates a truth table and diplays it.'''
+        input_expression = self.ids["truth_input"].text 
+        out = generateTruthTable(input_expression)
         if out == "Invalid Input":
-            self.ids["truth_label"].text = ""
+            if input_expression == "Enter Boolean Expression Here":
+                self.ids["truth_label"].text = "Truth table will appear here"
+            else:
+                self.ids["truth_label"].text = "Invalid Input."
         else:
             out2 = tabulate(out[0], headers=out[0].keys(), tablefmt="pretty")
             self.ids["truth_label"].text = f"{out[1]}\n{out2}"
-            #print(f"{out[1]}\n{out2}")
+
 
 class ConnectionLine(Widget):
+    '''Class for lines that connects components together'''
     color_state = ListProperty()
     def __init__(self, out_gate, in_gate, in_node, **kwargs):
         super().__init__(**kwargs)
@@ -79,12 +90,15 @@ class ConnectionLine(Widget):
         self.update_state()
         
     def get_gates(self):
+        '''Returns tuple: (component line is exiting, component line is entering)'''
         return (self.out_gate, self.in_gate)
     
     def get_nodes(self):
+        '''Returns tuple: (component line is exiting, node its exiting), (component line is entering, node its entering))'''
         return ((self.out_gate, -1), (self.in_gate, self.in_node))
 
     def get_turn_points(self, out_node_pos, in_node_pos):
+        '''Returns the extra points to make the line the shape it is <<<<<'''
         x1 = out_node_pos[0]
         x2 = in_node_pos[0]
         y1 = out_node_pos[1]
@@ -95,19 +109,21 @@ class ConnectionLine(Widget):
         return turn1 + turn2
 
     def update_state(self):
+        '''Updates colour of line to match the output of the component its exiting.'''
         self.state = self.out_gate.get_state()
         self.color_state = self.color_states[self.state]
 
     def update_pos(self):
+        '''Updates the points of the line to match the position of the components its connect to.'''
         out_node_pos = self.out_gate.get_node_pos(-1)
         in_node_pos = self.in_gate.get_node_pos(self.in_node)
         self.points = out_node_pos + self.get_turn_points(out_node_pos, in_node_pos) + in_node_pos
         self.outline.points = self.points
         self.inline.points = self.points
-        #print(self.pos, self.size)
 
 
 class GateCanvas(FloatLayout):
+    '''Canvas where components and connection lines are placed onto'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.connection_lines = []
@@ -126,27 +142,64 @@ class GateCanvas(FloatLayout):
             "output":DragOutput,
             "clock":DragClock
         }
+        
+    def add_connection_line(self, out_gate, in_gate, in_node):
+        '''Creates connection line.'''
+        line = ConnectionLine(out_gate, in_gate, in_node)
+        self.connection_lines.append(line)
+        self.add_widget(line)
 
     def update_connection_lines(self):
+        '''Updates the postions of all connection lines on the canvas'''
         for line in self.connection_lines[:]:
             line.update_pos()
 
     def update_states(self):
+        '''Updates the states of all components and connection lines on the canvas'''
         for gate in self.gates:
             gate.update_state()
         for line in self.connection_lines:
             line.update_state()
     
     def set_tool(self, tool):
+        '''Sets the tool, can be move, connect, disconnect'''
         self.tool = tool
-        if tool in ("connect", "disconnect"):
-            for gate in self.gates[:]:
-                gate.show_nodes()
-        else:
+        if tool is "move":
             for gate in self.gates[:]:
                 gate.hide_nodes()
+        else:
+            for gate in self.gates[:]:
+                gate.show_nodes()
+                self.deselect_gates()
+        
+    def on_touch_down(self, touch):
+        '''Checks if there is a touch down within the canvas, Calls a method based on the cuurent tool if there is'''
+        if self.collide_point(*touch.pos): 
+            if touch.is_double_tap and self.tool != "move":
+                self.root.set_tool("move")
+                return True
+            if self.tool == "connect":
+                return self.connect_down(touch)
+            
+            if self.tool == "disconnect":
+                return self.disconnect_down(touch)
+            
+            if self.tool == "move":
+                return self.move_down(touch)
+
+    def on_touch_up(self, touch):
+        '''Checks if there is a touch up within the canvas, Calls a method based on the cuurent tool if there is'''
+        if self.collide_point(*touch.pos):
+            if self.tool == "connect":
+                return self.connect_up(touch)
+            if self.tool == "disconnect":
+                pass
+            if self.tool == "move":
+                pass
+        return super().on_touch_up(touch)
         
     def connect_down(self, touch):
+        '''Checks for node collision on touch down. If collision replace either out_connection or in_connection attribute with (node, gate) tuple'''
         self.deselect_gates()
         for gate in self.gates[:]:
             if node := gate.get_node_collide(touch):
@@ -159,6 +212,8 @@ class GateCanvas(FloatLayout):
         return True
 
     def connect_up(self, touch):
+        '''Checks for node collision on touch up. If collision, replace either out_connection or in_connection attribute with (node, gate) tuple.
+        If out_connection and in_connection both have values, connects the component nodes together'''
         for gate in self.gates[:]:
             if node := gate.get_node_collide(touch):
                 if node == -1:
@@ -176,11 +231,9 @@ class GateCanvas(FloatLayout):
                     out_gate = self.out_connection[1]
                     in_node = self.in_connection[0]
                     
-                    if self.board.connectGate(in_gate.get_logic_gate(), out_gate.get_logic_gate(), node=in_node):
-                        line = ConnectionLine(out_gate, in_gate, in_node)
-                        self.connection_lines.append(line)
-                        self.add_widget(line)
-                    
+                    if self.board.connect_gate(in_gate.get_logic_gate(), out_gate.get_logic_gate(), node=in_node):
+                        self.add_connection_line(out_gate, in_gate, in_node)
+            
                     self.update_states()
                         
         for gate in self.gates[:]:
@@ -191,6 +244,7 @@ class GateCanvas(FloatLayout):
         return True
 
     def move_down(self, touch):
+        '''Calls on_touch_down method for children.'''
         for child in self.gates[::-1]:
             if child.dispatch('on_touch_down', touch):
                 return True
@@ -200,71 +254,50 @@ class GateCanvas(FloatLayout):
         return True
     
     def disconnect_down(self, touch):
+        '''Checks for node collision on touch down. If collision, disconnect clicked node from any nodes its connected to and remove connection lines.'''
         self.deselect_gates()
         for gate in self.gates[:]:
             if node := gate.get_node_collide(touch):
+                
                 if node == -1:
                     for line in self.connection_lines:
                         gate_node_tuple = line.get_nodes()
                         if gate_node_tuple[0][0] == gate:
                             gate2 = gate_node_tuple[1][0]
-                            self.board.disconnectGate(gate2.get_logic_gate(), gate.get_logic_gate())
+                            self.board.disconnect_gate(gate2.get_logic_gate(), gate.get_logic_gate())
                             self.connection_lines.remove(line)
                             self.remove_widget(line)
+                
                 elif node == 1 or node == 2:
                     for line in self.connection_lines:
                         gate_node_tuple = line.get_nodes()
                         if gate_node_tuple[1] == (gate,node):
                             gate2 = gate_node_tuple[0][0]
-                            self.board.disconnectGate(gate.get_logic_gate(), gate2.get_logic_gate())
+                            self.board.disconnect_gate(gate.get_logic_gate(), gate2.get_logic_gate())
                             self.connection_lines.remove(line)
                             self.remove_widget(line)
         self.update_states()        
         return True
-
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos): 
-            if touch.is_double_tap and self.tool != "move":
-                self.root.set_tool("move")
-                return True
-            #print(self.board.gates)
-            if self.tool == "connect":
-                return self.connect_down(touch)
-            
-            if self.tool == "disconnect":
-                return self.disconnect_down(touch)
-            
-            if self.tool == "move":
-                return self.move_down(touch)
-
-    def on_touch_up(self, touch):
-        if self.collide_point(*touch.pos):
-            if self.tool == "connect":
-                return self.connect_up(touch)
-            if self.tool == "disconnect":
-                pass
-            if self.tool == "move":
-                pass
-        return super().on_touch_up(touch)
-   
     
     def get_selected_gates(self):
+        '''returns a list of all components that are selected'''
         return [child for child in self.gates[:] if child.is_selected()]
 
     def deselect_gates(self):
+        '''deselect all seletcted components'''
         [child.deselect() for child in self.gates[:]]
 
-
     def add_gate(self, gate_type):
+        '''creates new visual component and adds it to canvas, adds logic bit of created component to logic board.'''
         new_gate = self.gate_dict[gate_type](parent_rect=(self.x, self.y, self.width, self.height))
         self.add_widget(new_gate)
         self.gates.append(new_gate)
         new_gate.root = self.root
-        self.board.addGate(new_gate.get_logic_gate())
+        self.board.add_gate(new_gate.get_logic_gate())
         new_gate.update_state()
-        #print(self.board.gates)
 
     def delete_gate(self):
+        '''Deletes selected components from canvas and logic board, also removes any connection lines they are connected to.'''
         if not self.tool == "move":
             self.root.set_tool("move")
         else:
@@ -277,20 +310,21 @@ class GateCanvas(FloatLayout):
                         self.remove_widget(line)
                         del line
                 
-                self.board.removeGate(gate.get_logic_gate())
+                self.board.remove_gate(gate.get_logic_gate())
                 self.remove_widget(gate)
                 self.gates.remove(gate)
                 del gate
                 self.update_states()
 
     def clear_canvas(self):
-        self.board.clearBoard()
+        '''Deletes all components from canvas and logic board'''
+        self.board.clear_board()
         self.clear_widgets()
         self.gates = []
-        #print(self.board.gates)
 
 
 class DragGate(DragBehavior, FloatLayout):
+    '''Visual components parent class. DOCSRINGS!'''
     def __init__(self, parent_rect, **kwargs):
         super().__init__(**kwargs)
         self.drag_rectangle = parent_rect
@@ -308,6 +342,7 @@ class DragGate(DragBehavior, FloatLayout):
         self.nodes_init()
 
         self.border = Line(rounded_rectangle = (self.x, self.y, self.width, self.height, 10))
+        self.canvas.add(Color(0,0,0,1))
         self.canvas.add(self.border)
         
         self.logic_gate = None
@@ -381,15 +416,15 @@ class DragGate(DragBehavior, FloatLayout):
         return self.selected
 
     def show_nodes(self):
-        for i in self.nodes:
-            i.opacity = 1
-            i.disabled = False
+        for node in self.nodes:
+            node.opacity = 1
+            node.disabled = False
         self.update_nodes()
 
     def hide_nodes(self):
-        for i in self.nodes:
-            i.opacity = 0
-            i.disabled = True
+        for node in self.nodes:
+            node.opacity = 0
+            node.disabled = True
 
     def select(self):
         self.selected = True
@@ -460,9 +495,9 @@ class DragSwitch(DragGate):
         self.out_node.center=(self.right, self.y+(self.height//2))
 
     def get_node_collide(self, touch):
-        for i in self.nodes:
-            if i.collide_point(*touch.pos):
-                if i == self.out_node:
+        for node in self.nodes:
+            if node.collide_point(*touch.pos):
+                if node == self.out_node:
                     return -1
         return False
 
@@ -513,23 +548,11 @@ class DragClock(DragGate):
         self.out_node.center=(self.right, self.y+(self.height//2))
 
     def get_node_collide(self, touch):
-        for i in self.nodes:
-            if i.collide_point(*touch.pos):
-                if i == self.out_node:
+        for node in self.nodes:
+            if node.collide_point(*touch.pos):
+                if node == self.out_node:
                     return -1
         return False
-
-    #CHANGEEEEEE
-    def on_touch_up(self, touch):
-        if self.dragged:
-            return super().on_touch_up(touch)
-        elif (touch.pos[0] < self.right - 30) and (touch.pos[0] > self.x + 10) and (touch.pos[1] < self.top - 20) and (touch.pos[1] > self.y + 20):
-            #print("BUTTTON PRESSED, I REPEAT BUTTON PRESSED", self.dragged)
-            self.logic_gate.flip()
-            self.update_state()
-            self.parent.update_states()
-            return True
-        return super().on_touch_up(touch)
     
     def update_state(self):
         x = self.logic_gate.getOutput()
@@ -555,9 +578,9 @@ class DragOutput(DragGate):
         self.in_node_1.center=(self.x, self.center_y)
 
     def get_node_collide(self, touch):
-        for i in self.nodes:
-            if i.collide_point(*touch.pos):
-                if i == self.in_node_1:
+        for node in self.nodes:
+            if node.collide_point(*touch.pos):
+                if node == self.in_node_1:
                     return 1
         return False
 
@@ -587,6 +610,7 @@ class DragXorGate(DragGate):
         self.logic_gate = Xor_Gate()
 
 class DragNotGate(DragGate):
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.img.source = "Images/GateIcons/not.png"
@@ -617,14 +641,15 @@ class DragNotGate(DragGate):
 
 
 class MainWindow(Widget):
+    '''Main Window class'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.ids["gateCanvas"].root = self
         self.toggles = ["connectToggle", "moveToggle", "disconnectToggle"]
         
     def set_tool(self, tool):
+        '''Calls Gate Canvases set_tool method.'''
         self.ids["gateCanvas"].set_tool(tool)
-        self.ids["toolLabel"].text = tool
         toggle = f"{tool}Toggle"
         if self.ids[toggle].state == 'down':
             pass
@@ -636,18 +661,25 @@ class MainWindow(Widget):
                     self.ids[i].state = 'normal'
     
     def clear_canvas(self):
+        '''Calls Gate Canvases clear_canvas method.'''
         self.ids["gateCanvas"].clear_canvas()
-
-    def delete_gate(self):
-        self.ids["gateCanvas"].delete_gate()
         self.set_tool("move")
 
     def add_gate(self, gate_type):
+        '''Calls Gate Canvases add_gate method.'''
         self.ids["gateCanvas"].add_gate(gate_type)
         
-kv = Builder.load_file("test.kv")
+    def delete_gate(self):
+        '''Calls Gate Canvases delete_gate method.'''
+        self.ids["gateCanvas"].delete_gate()
+        self.set_tool("move")
+
+
+kv = Builder.load_file("LogicSim.kv")
+'''Loads the kivy file'''
 
 class LogicGateSimulator(App):
+    '''Builds the kivy app'''
     def build(self):
         self.icon = "Images/GateIcons/and.png"
         return MainWindow()

@@ -8,16 +8,28 @@
 
 <ActionButton>:
     font_size:15
-    color: 1,1,1,1
+    color: 0,0,0,1
     background_normal: ''
-    background_color: 0.4,0.4,0.4,1
+    background_color: 0.8,0.8,0.8,1
 
 <GateButton@Button>:
     size_hint: None, None
+    used: False
     center: self.parent.center
+    background_normal: ''
+    background_color: 0.8,0.8,0.8,1
+    canvas:
+        Color:
+            rgba: (0.9,0.2,0.2,1) if not self.used else (0,0,0,1)
+        Line:
+            width: 2
+            rectangle: self.x, self.y, self.width, self.height
 
 <ToolToggleButton@ToggleButton>:
     font_size: 15
+    color: 0,0,0,1
+    background_normal: ''
+    background_color: 0.8,0.8,0.8,1
     size_hint_y: None
     size: 100,100
     pos_hint: {"center_x":0.5}
@@ -25,13 +37,16 @@
 
 <ToolButton@Button>:
     font_size: 15
+    color: 0,0,0,1
+    background_normal: ''
+    background_color: 0.8,0.8,0.8,1
     size_hint_y: None
     size: 100,100
     pos_hint: {"center_x":0.5}
 
 <GateLabel@Label>:
     font_size: 25
-    color: 0,0,0,1
+    color: 1,1,1,1
 
 <ExitPopup>:
     auto_dismiss: True
@@ -56,6 +71,7 @@
     size_hint: 0.6, 0.8
     BoxLayout:
         orientation: "vertical"
+        padding: 2
         ScrollView:
             size_hint: 1, 0.6
             do_scroll_x: False
@@ -69,8 +85,9 @@
                 bold: True
                 font_name: root.FONT
                 color: (0,0,0,1)
-                text: "YOOOOOOO"
         GridLayout:
+            spacing: 2
+            padding: 2
             size_hint: 1, None
             height: 50
             rows: 1
@@ -92,13 +109,20 @@
                 size_hint: None, 1
                 width: 100
 
-
 <GridLayout>:
+    canvas.before:
+        Color:
+            rgba: (0.8,0.8,0.8,1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<MyGridLayout@GridLayout>:
     padding: 2
     spacing: 2
     canvas.before:
         Color:
-            rgba: (0.8,0.8,0.8,1)
+            rgba: (0.2,0.2,0.2,1)
         Rectangle:
             pos: self.pos
             size: self.size
@@ -110,7 +134,7 @@
         rows:2
         orientation: "tb-lr"
         ActionBar:
-            height: 30
+            height: 40
             pos_hint: {"top":1}
             ActionView:
                 spacing: 2
@@ -135,16 +159,22 @@
                     on_release: Factory.ExitPopup().open()
                 
         
-        GridLayout:
+        MyGridLayout:
             size: self.parent.width, self.parent.height
             orientation: "tb-rl"
             cols: 3
             padding: 0
-            GridLayout:
+            MyGridLayout:
                 orientation: "tb-lr"
                 cols:1
                 size_hint: None, 1
                 width: 100
+                Label:
+                    color: 1,1,1,1
+                    markup: True
+                    font_size: 30
+                    size_hint_y: None
+                    text: "[b]Tools[/b]"
                 ToolToggleButton:
                     id: connectToggle
                     group: "tools"
@@ -167,29 +197,25 @@
                 ToolButton:
                     text: "Clear"
                     on_press: root.clear_canvas()
-                Label:
-                    id: toolLabel
-                    color: 0,0,0,1
-                    text: gateCanvas.tool
             GateCanvas:
                 id: gateCanvas
                 canvas.before:
                     Color:
-                        rgba: (0.1,0.6,0.6,1)
+                        rgba: (0.8,0.8,0.8,1)
                     Rectangle:
                         pos: map(lambda x: x+5, self.pos)
                         size: map(lambda x: x-10, self.size)
                 canvas.after:
                     Color:
-                        rgba: (1,0,0,1)
+                        rgba: (0,0,0,1)
                     Line:
                         width: 4
-                        rectangle: (self.x+2, self.y+2, self.width-4, self.height-4)
+                        rectangle: (self.x+4, self.y+4, self.width-8, self.height-8)
             ScrollView:
                 size_hint: None, 1
                 width: 200
                 effect_cls: "ScrollEffect"
-                GridLayout:
+                MyGridLayout:
                     size_hint_y: None
                     height: 900
                     cols: 1
@@ -198,9 +224,9 @@
                         size_hint: 1,0.1
                         markup: True
                         font_size: 40
-                        color: 0,0,0,1
+                        color: 1,1,1,1
                         text: "[b]Gates[/b]"
-                    GridLayout:
+                    MyGridLayout:
                         cols: 2
                         spaceing: 1
                         padding: 1
@@ -210,7 +236,9 @@
                             text: "And"
                         GateButton:
                             id: And
-                            on_press: root.add_gate("and")
+                            on_press:
+                                root.add_gate("and")
+                                self.used = True
 
                             Image:
                                 source: 'Images/GateIcons/and.png'
@@ -223,7 +251,9 @@
                             text: "Or"
                         GateButton:
                             id: Or
-                            on_press: root.add_gate("or")
+                            on_press:
+                                root.add_gate("or")
+                                self.used = True
 
                             Image:
                                 source: 'Images/GateIcons/or.png'
@@ -236,7 +266,9 @@
                             text: "Not"
                         GateButton:
                             id: Not
-                            on_press: root.add_gate("not")
+                            on_press:
+                                root.add_gate("not")
+                                self.used = True
 
                             Image:
                                 source: 'Images/GateIcons/not.png'
@@ -249,7 +281,9 @@
                             text: "Xor"
                         GateButton:
                             id: Xor
-                            on_press: root.add_gate("xor")
+                            on_press:
+                                root.add_gate("xor")
+                                self.used = True
 
                             Image:
                                 source: 'Images/GateIcons/xor.png'
@@ -262,7 +296,9 @@
                             text: "Switch"
                         GateButton:
                             id: Input
-                            on_press: root.add_gate("switch")
+                            on_press:
+                                root.add_gate("switch")
+                                self.used = True
                             
                             Image:
                                 source: 'Images/GateIcons/switch_menu.png'
@@ -275,7 +311,9 @@
                             text: "Output"
                         GateButton:
                             id: Output
-                            on_press: root.add_gate("output")
+                            on_press:
+                                root.add_gate("output")
+                                self.used = True
 
                             Image:
                                 source: 'Images/GateIcons/output_menu.png'
@@ -288,8 +326,10 @@
                             text: "Clock"
                         GateButton:
                             id: Clock
-                            on_press: root.add_gate("clock")
-
+                            on_press:
+                                root.add_gate("clock")
+                                self.used = True
+                                
                             Image:
                                 source: 'Images/GateIcons/clock_menu.png'
                                 width: self.parent.width * 0.9

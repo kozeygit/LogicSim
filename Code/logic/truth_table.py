@@ -61,27 +61,11 @@ def generateTruthTable(expression):
     else:
         return (final_dictionary, input_expression)
 
-def truth_dict_to_string(final_dictionary, input_expression):
-    final_string = ''
-    final_string = final_string + str("Boolean Expression: " + input_expression.upper() + "\n")
-    for i in final_dictionary:
-        if i.lower() == 'out':
-            final_string = final_string + (f"|{i}")
-        else:
-            final_string = final_string + (f"| {i} ")
-    final_string = final_string + ('|\n')
-    for i in range(len(final_dictionary['OUT'])):
-        for ii in final_dictionary:
-            final_string = final_string + (f"| {final_dictionary[ii][i]} ")
-        final_string = final_string + ('|\n')
-
-    return final_string
-
-
 if __name__ == '__main__':
+    # for testing
     sys('clear')
-    e = input('Here: ')
-    print(generateTruthTable(e))
+    exp = input('Here: ')
+    print(generateTruthTable(exp))
     print()
 
 
