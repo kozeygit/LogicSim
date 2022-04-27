@@ -510,7 +510,7 @@ class DragSwitch(DragGate):
             self.logic_gate.flip()
             self.update_state()
             self.parent.update_states()
-            return True
+            self.dragged = True
         return super().on_touch_up(touch)
     
     def update_state(self):
