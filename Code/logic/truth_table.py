@@ -1,8 +1,8 @@
 from itertools import permutations
 from os import system as sys
+from typing import Union, Tuple
 
-# executes the boolean expression
-def getTruthTableOutputs(expression, dictionary, num_permutations):
+def get_tt_outputs(expression: str, dictionary: dict[str, list], num_permutations: int) -> dict[str, list]:
     truth_dictionary = dictionary
     list_of_outputs = []
     for i in range(num_permutations):
@@ -19,10 +19,8 @@ def getTruthTableOutputs(expression, dictionary, num_permutations):
     return truth_dictionary
 
 
-def generateTruthTable(expression):
-  
-    # string manipulation to replace words with operators that python can evaluate
-    # making words operators also help when finding variables
+def generate_truth_table(expression: str) -> Union[Tuple[dict[str, list], str], str]:
+    '''Returns a truth table in dictionary form'''
     input_expression = expression
     expression = expression.lower()
     expression = expression.replace("not ", "2+~ ")
@@ -34,43 +32,35 @@ def generateTruthTable(expression):
     operators = ["2+~", "&", "^", "|", "(", ")"]
     variables = []
 
-    # gets list of the differnt variables in the expression
     temp_exp = expression.replace("(", "").replace(")", "")
-    for i in temp_exp.split(" "):
-        if i not in operators and i not in variables:
-            variables.append(i)
+    for var in temp_exp.split(" "):
+        if var not in operators and var not in variables:
+            variables.append(var)
     num_variables = len(variables)
 
-    # gets a list of permutations based on the number of variables, also removes repeats
-    temp = [0 for i in range(num_variables)] + [1 for i in range(num_variables)]
-    p = permutations(temp, num_variables)
+    temp = [0 for _ in range(num_variables)] + [1 for _ in range(num_variables)]
+    perms = permutations(temp, num_variables)
     variable_permutations = []
-    for i in p:
-        if i not in variable_permutations:
-            variable_permutations.append(i)
-
+    for perm in perms:
+        if perm not in variable_permutations:
+            variable_permutations.append(perm)
 
     dictionary = dict()
-    for i,j in enumerate(variables):
-        dictionary[j] = [ii[i] for ii in variable_permutations]
+    for i, key in enumerate(variables):
+        dictionary[key] = [perm[i] for perm in variable_permutations]
 
-    final_dictionary = getTruthTableOutputs(expression, dictionary, len(variable_permutations))
+    final_dictionary = get_tt_outputs(expression, dictionary, len(variable_permutations))
 
     if final_dictionary == "Error":
         return "Invalid Input"
     else:
         return (final_dictionary, input_expression)
 
+
 if __name__ == '__main__':
-    # for testing
+    '''For Testing'''
     sys('clear')
     exp = input('Here: ')
-    print(generateTruthTable(exp))
+    print(generate_truth_table(exp))
     print()
-
-
-    """NOT ((A and B) or (c and not B))"""
-
-
-
 

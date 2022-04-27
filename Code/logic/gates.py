@@ -2,10 +2,12 @@
 Docstrings Done, not proof read.
 '''
 
+from typing import Union # For type hinting
+
 class Gate:
     '''Logic Gate component class. Parent class for logic gates.'''
     ID = 0
-    def __init__(self):
+    def __init__(self) -> None:
         self._input_nodes = [None, None]
         self._output_nodes = []
         self._output = None
@@ -15,11 +17,11 @@ class Gate:
         self.id = Gate.ID
         Gate.ID += 1
 
-    def evaluate(self):
+    def evaluate(self) -> None:
         '''Not implemented in parent class.'''
         pass
     
-    def hasInput(self, node=0):
+    def has_input(self, node=0) -> bool:
         '''Checks if nodes are connected to other components.'''
         if node == 0:
             return bool(self._input_nodes[0] and self._input_nodes[1])
@@ -28,68 +30,64 @@ class Gate:
         elif node == 2:
             return bool(self._input_nodes[1])
 
-    def connectNode(self, gate, node):
+    def connect_node(self, gate, node) -> bool:
         '''Connects given component to given node of self'''
         if gate in self._input_nodes:
-            print("Gate connected to me already")
             return False
         if node == 1:
-            if not self.hasInput(1):
+            if not self.has_input(1):
                 self._input_nodes[0] = gate
-                gate.connectNode(self, -1)
-                self.updateExpression()
+                gate.connect_node(self, -1)
+                self.update_expression()
                 return True
             else:
-                print(f"{self.name}\n node 1 Connected to another gate already")
                 return False
         elif node == 2:
-            if not self.hasInput(2):
+            if not self.has_input(2):
                 self._input_nodes[1] = gate
-                gate.connectNode(self, -1)
-                self.updateExpression()
+                gate.connect_node(self, -1)
+                self.update_expression()
                 return True
             else:
-                print(f"{self.name}\n node 2 Connected to another gate already")
                 return False
         elif node == -1:
             self._output_nodes.append(gate)
-            return
+            return True
 
-    def disconnectNode(self, gate):
+    def disconnect_node(self, gate) -> bool:
         '''Disconnects given component from self.'''
         if self._input_nodes[0] is gate:
-            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0].disconnect_node(self)
             self._input_nodes[0] = None
-            self.updateExpression()
+            self.update_expression()
             return True
         elif self._input_nodes[1] is gate:
-            self._input_nodes[1].disconnectNode(self)
+            self._input_nodes[1].disconnect_node(self)
             self._input_nodes[1] = None
-            self.updateExpression()
+            self.update_expression()
             return True
         elif gate in self._output_nodes:
             self._output_nodes.remove(gate)
             return True
         else:
-            print(f"No connection between {self.name} and {gate.getName()}")
             return False
 
-    def disconnectAll(self):
+    def disconnect_all(self) -> None:
         '''Disconnects all inputs and outputs from self.'''
         if self._input_nodes[0] != None:
-            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0].disconnect_node(self)
             self._input_nodes[0] = None
-            self.updateExpression()
+            self.update_expression()
         if self._input_nodes[1] != None:
-            self._input_nodes[1].disconnectNode(self)
+            self._input_nodes[1].disconnect_node(self)
             self._input_nodes[1] = None
-            self.updateExpression()
+            self.update_expression()
         for gate in self._output_nodes:
-            gate.disconnectNode(self)
+            gate.disconnect_node(self)
         
-    def _process(self):
+    def _process(self) -> None:
         '''Uses evaluate method to set output of self. If both input nodes empty, or any input nodes output is None, output is set to None.'''
-        if self.hasInput():
+        if self.has_input():
             var1 = self._input_nodes[0].getOutput()
             var2 = self._input_nodes[1].getOutput()
             if var1 == None or var2 == None:
@@ -99,9 +97,9 @@ class Gate:
         else:
             self._output = None
     
-    def updateExpression(self):
+    def update_expression(self) -> None:
         '''Updates the boolean expression of self. Used when connecting or disconnecting components to/from self.'''
-        if self.hasInput():
+        if self.has_input():
             if self._input_nodes[0].getGateType() == 'switch':
                 exp1 = self._input_nodes[0].getExpression()
             else:
@@ -116,78 +114,78 @@ class Gate:
         else:
             self._expression = None
 
-    def getExpression(self):
+    def get_expression(self) -> str:
         '''Returns boolean expression of self.'''
         return self._expression
 
-    def getGateType(self):
+    def get_gate_type(self) -> str:
         '''Returns the type of component that self is.'''
         return self._type
 
-    def getOutput(self):
+    def get_name(self) -> str:
+        '''Returns the name of self. Name is string: type_id.'''
+        return self.name
+    
+    def get_output(self) -> Union[int, None]:
         '''Calls process method, then return output of self.'''
         self._process()
         return self._output
 
-    def getName(self):
-        '''Returns the name of self. Name is string: type_id.'''
-        return self.name
-
 
 class And_Gate(Gate):
     '''Logic And_Gate component class, child of Gate class.'''
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._type = 'and'
         self.name = f"{self._type}_{str(self.id)}"
         
-    def evaluate(self, var1, var2):
+    def evaluate(self, var1, var2) -> int:
         '''Return the result of an and comparison bewtween two variables.'''
-        return (var1 and var2)
+        return int(var1 and var2)
 
 
 class Or_Gate(Gate):
     '''Logic Or_Gate component class, child of Gate class.'''
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._type = 'or'
         self.name = f"{self._type}_{str(self.id)}"
 
-    def evaluate(self, var1, var2):
+    def evaluate(self, var1, var2) -> int:
         '''Return the result of an or comparison bewtween two variables.'''
-        return (var1 or var2)
+        return int(var1 or var2)
 
 
 class Xor_Gate(Gate):
     '''Logic Xor_Gate component class, child of Gate class.'''
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._type = 'xor'
         self.name = f"{self._type}_{str(self.id)}"
 
-    def evaluate(self, var1, var2):
+    def evaluate(self, var1, var2) -> int:
         '''Return the result of an xor comparison bewtween two variables.'''
-        return (var1 and not var2) or (not var1 and var2)
+        return int((var1 and not var2) or (not var1 and var2))
 
 
 class Not_Gate(Gate):
     '''Logic Not_Gate component class, child of Gate class.'''
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._type = 'not'
         self.name = f"{self._type}_{str(self.id)}"
 
-    def evaluate(self, var1):
+    def evaluate(self, var1) -> int:
         '''Return the result of a not operation on a variable.'''
         return int((not var1))
     
-    def hasInput(self):
+    def has_input(self) -> bool:
         '''Checks if input node is connected to another component.'''
         return bool(self._input_nodes[0])
 
-    def _process(self):
+    def _process(self) -> None:
         '''Uses evaluate method to set output of self. If has no input node, or input nodes output is None, output is set to None.'''
-        if self.hasInput():
+        if self.has_input():
             var1 = self._input_nodes[0].getOutput()
             if var1 == None:
                 self._output = None
@@ -196,42 +194,40 @@ class Not_Gate(Gate):
         else:
             self._output = None
     
-    def connectNode(self, gate, node):
+    def connect_node(self, gate, node) -> bool:
         '''Connects given component to given node of self.'''
         if node == 1:
-            if not self.hasInput():
+            if not self.has_input():
                 self._input_nodes[0] = gate
-                gate.connectNode(self, -1)
-                self.updateExpression()
+                gate.connect_node(self, -1)
+                self.update_expression()
                 return True
             else:
-                print(f"{self.name}\nConnected to another node already")
                 return False
   
-    def disconnectNode(self, gate):
+    def disconnect_node(self, gate) -> bool:
         '''Disconnects given component from self.'''
         if self._input_nodes[0] is gate:
-            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0].disconnect_node(self)
             self._input_nodes[0] = None
-            self.updateExpression()
+            self.update_expression()
             return True
         elif gate in self._output_nodes:
             self._output_nodes.remove(gate)
             return True
         else:
-            print(f"No connection between {self.name} and {gate.getName()}")
             return False
 
-    def disconnectAll(self):
+    def disconnect_all(self) -> None:
         '''Disconnects all inputs and outputs from self.'''
         if self._input_nodes[0] != None:
-            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0].disconnect_node(self)
             self._input_nodes[0] = None
-            self.updateExpression()
+            self.update_expression()
 
-    def updateExpression(self):
+    def update_expression(self) -> None:
         '''Updates the boolean expression of self. Used when connecting or disconnecting components to/from self.'''
-        if self.hasInput():
+        if self.has_input():
             self._expression = str(f"{self._type}({self._input_nodes[0].getExpression()})")
         else:
             self._expression = None
@@ -240,7 +236,7 @@ class Not_Gate(Gate):
 class Switch:
     '''Logic Switch component class.'''
     ID = 0
-    def __init__(self):
+    def __init__(self) -> None:
         self._output = 0
         self._output_nodes = []
         self._type = 'switch'
@@ -248,42 +244,42 @@ class Switch:
         Switch.ID += 1
         self.name = (f"{self._type}_{self.id}")
  
-    def connectNode(self, gate, node):
+    def connect_node(self, gate, node) -> bool:
         '''Connects given component to given node of self.'''
         if gate not in self._output_nodes and node == -1:
             self._output_nodes.append(gate)
             return True
         return False
 
-    def disconnectNode(self, gate):
+    def disconnect_node(self, gate) -> bool:
         '''Disconnects given component from self.'''
         if gate in self._output_nodes:
             self._output_nodes.remove(gate)
             return True
         return False
 
-    def disconnectAll(self):
+    def disconnect_all(self) -> None:
         '''Disconnects all inputs and outputs from self.'''
         for gate in self._output_nodes:
-            gate.disconnectNode(self)
+            gate.disconnect_node(self)
 
-    def flip(self):
+    def flip(self) -> None:
+        '''Changes output of self from 0 to 1 or 1 to 0.'''
         self._output = int(not(self._output))
-        #print(self._output_nodes)
 
-    def getName(self):
+    def get_name(self) -> str:
         '''Returns the name of self. Name is string: type_id.'''
         return self.name
     
-    def getGateType(self):
+    def get_gate_type(self) -> str:
         '''Returns the type of self that self is.'''
         return self._type
         
-    def getExpression(self):
+    def get_expression(self) -> str:
         '''Return character id of self.'''
         return self.id
 
-    def getOutput(self):
+    def get_output(self) -> Union[int, None]:
         '''Returns output of self.'''
         return self._output
 
@@ -291,7 +287,7 @@ class Switch:
 class Output:
     '''Logic Output component class.'''
     ID = 65
-    def __init__(self):
+    def __init__(self) -> None:
         self._output = None
         self._input_nodes = [None]
         self._type = 'output'
@@ -299,7 +295,7 @@ class Output:
         Output.ID += 1
         self.name = (f"{self._type}_{self.id}")
 
-    def _process(self):
+    def _process(self) -> None:
         '''Sets output of self to output of input node. If input node is empty, output is set to None.'''
         try:
             self._output = self._input_nodes[0].getOutput()
@@ -307,46 +303,45 @@ class Output:
             print(e, len(self._input_nodes))
             self._output = None
   
-    def connectNode(self, gate, node):
+    def connect_node(self, gate, node) -> bool:
         '''Connects given component to given node of self.'''
         if self._input_nodes[0] == None:
             self._input_nodes[0] = gate
-            gate.connectNode(self, -1)
+            gate.connect_node(self, -1)
             return True
         else:
-            print("Node already connected to", self._input_nodes[0])
             return False
 
-    def disconnectNode(self, gate):
+    def disconnect_node(self, gate) -> bool:
         '''Disconnects given component from self.'''
         if self._input_nodes[0] is gate:
             self._input_nodes[0] = None
-            gate.disconnectNode(self)
+            gate.disconnect_node(self)
             return True
         return False
 
-    def disconnectAll(self):
+    def disconnect_all(self) -> None:
         '''Disconnects all inputs and outputs from self.'''
         if self._input_nodes[0] == None:
             pass
         else:
-            self._input_nodes[0].disconnectNode(self)
+            self._input_nodes[0].disconnect_node(self)
             self._input_nodes[0] = None
         self._process()
 
-    def getExpression(self):
+    def get_expression(self) -> str:
         '''Return boolean expression of input component.'''
         return self._input_nodes[0].getExpression()
 
-    def getName(self):
+    def get_name(self) -> str:
         '''Returns the name of self. Name is string: type_id.'''
         return self.name
 
-    def getGateType(self):
+    def get_gate_type(self) -> str:
         '''Returns the type of component that self is.'''
         return self._type
 
-    def getOutput(self):
+    def get_output(self) -> Union[int, None]:
         '''Calls process method, then return output of self.'''
         self._process()
         return self._output

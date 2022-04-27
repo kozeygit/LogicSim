@@ -58,7 +58,7 @@ class TruthPopup(Popup):
     def generate(self):
         '''Using expression in input field, generates a truth table and diplays it.'''
         input_expression = self.ids["truth_input"].text 
-        out = generateTruthTable(input_expression)
+        out = generate_truth_table(input_expression)
         if out == "Invalid Input":
             if input_expression == "Enter Boolean Expression Here":
                 self.ids["truth_label"].text = "Truth table will appear here"
@@ -470,7 +470,7 @@ class DragGate(DragBehavior, FloatLayout):
         return self.logic_gate
 
     def update_state(self):
-        x = self.logic_gate.getOutput()
+        x = self.logic_gate.get_output()
         #print(self, "I AM UPDATING", x)
         self.state = x
 
@@ -482,7 +482,7 @@ class DragSwitch(DragGate):
         super().__init__(**kwargs)
         self.logic_gate = Switch()
         self.states = {1:"GateIcons/switch_on.png", 0:"GateIcons/switch_off.png"}
-        self.img.source = self.states[self.logic_gate.getOutput()]
+        self.img.source = self.states[self.logic_gate.get_output()]
 
     def nodes_init(self):
         node_source="GateIcons/node.png"
@@ -514,7 +514,7 @@ class DragSwitch(DragGate):
         return super().on_touch_up(touch)
     
     def update_state(self):
-        x = self.logic_gate.getOutput()
+        x = self.logic_gate.get_output()
         #print(self, "I AM UPDATING", x)
         self.state = x
         self.img.source = self.states[self.state]
@@ -525,7 +525,7 @@ class DragClock(DragGate):
         self.logic_gate = Switch()
         
         self.states = {1:"GateIcons/clock_on.png", 0:"GateIcons/clock_off.png"}
-        self.img.source = self.states[self.logic_gate.getOutput()]
+        self.img.source = self.states[self.logic_gate.get_output()]
         Clock.schedule_interval(self.clock_flip, 1)
 
     def clock_flip(self, *args):
@@ -555,7 +555,7 @@ class DragClock(DragGate):
         return False
     
     def update_state(self):
-        x = self.logic_gate.getOutput()
+        x = self.logic_gate.get_output()
         #print(self, "I AM UPDATING", x)
         self.state = x
         self.img.source = self.states[self.state]
@@ -585,7 +585,7 @@ class DragOutput(DragGate):
         return False
 
     def update_state(self):
-        x = self.logic_gate.getOutput()
+        x = self.logic_gate.get_output()
         #print(self, "I AM UPDATING", x)
         self.state = x
         self.img.source = self.states[self.state]
@@ -654,11 +654,11 @@ class MainWindow(Widget):
         if self.ids[toggle].state == 'down':
             pass
         else:
-            for i in self.toggles:
-                if i == toggle:
-                    self.ids[i].state = 'down'
+            for tog in self.toggles:
+                if tog == toggle:
+                    self.ids[tog].state = 'down'
                 else:
-                    self.ids[i].state = 'normal'
+                    self.ids[tog].state = 'normal'
     
     def clear_canvas(self):
         '''Calls Gate Canvases clear_canvas method.'''
