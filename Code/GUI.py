@@ -525,8 +525,7 @@ class DragSwitch(DragGate):
                     return -1
         return False
 
-    def on_touch_up(self, touch):
-<<<<<<< HEAD
+    def on_touch_up(self, touch):h
         '''When user releases click, checks dragged attribute, if false and the touch is within the set area, the switch is flipped and dragged is set as true, then super of method is called.'''
         if not self.dragged:
             if (touch.pos[0] < self.right - 30) and (touch.pos[0] > self.x + 10) and (touch.pos[1] < self.top - 20) and (touch.pos[1] > self.y + 20):
@@ -534,19 +533,6 @@ class DragSwitch(DragGate):
                 self.update_state()
                 self.parent.update_states()
                 self.dragged = True
-=======
-        if self.dragged:
-            return super().on_touch_up(touch)
-        elif (touch.pos[0] < self.right - 30) and (touch.pos[0] > self.x + 10) and (touch.pos[1] < self.top - 20) and (touch.pos[1] > self.y + 20):
-            #print("BUTTTON PRESSED, I REPEAT BUTTON PRESSED", self.dragged)
-            self.logic_gate.flip()
-            self.update_state()
-            self.parent.update_states()
-            self.dragged = True
-<<<<<<< HEAD
->>>>>>> origin/main
-=======
->>>>>>> origin/main
         return super().on_touch_up(touch)
     
     def update_state(self):
