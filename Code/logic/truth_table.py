@@ -3,6 +3,7 @@ from os import system as sys
 from typing import Union, Tuple
 
 def get_tt_outputs(expression: str, dictionary: dict[str, list], num_permutations: int) -> dict[str, list]:
+    '''Adds OUT variable and values to incomplete truth table dictionary using by replacing variables in given expression.'''
     truth_dictionary = dictionary
     list_of_outputs = []
     for i in range(num_permutations):

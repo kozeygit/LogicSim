@@ -1,6 +1,5 @@
 #:kivy 2.0
 #:import Factory kivy.factory.Factory
-#:import rgba kivy.utils.rgba
 
 <GridLayout>:
     canvas.before:
@@ -34,7 +33,7 @@
     background_color: rgba(app.LIGHT_GREY)
     canvas:
         Color:
-            rgba: (0.9,0.2,0.2,1) if not self.used else rgba(app.DARK_GREY)
+            rgba: rgba(app.RED) if not self.used else rgba(app.DARK_GREY)
         Line:
             width: 2
             rectangle: self.x, self.y, self.width, self.height
@@ -78,17 +77,23 @@
     size_hint: None, None
     size: 350,150
     BoxLayout:
+        spacing: 10
         Button:
+            color: rgba(app.BLACK)
             text: 'Cancel'
-            size_hint: None, None
+            size_hint: 0.5, None
             height: 50
-            width: 100
+            background_normal: ''
+            background_color: rgba(app.LIGHT_GREY)
             on_release: root.dismiss()
         Button:
+            color: rgba(app.BLACK)
+            color: 
             text: 'Quit'
-            size_hint: None, None
+            size_hint: 0.5, None
             height: 50
-            width: 100
+            background_normal: ''
+            background_color: rgba(app.LIGHT_GREY)
             on_release: root.close_window()
 
 <TruthPopup>:
@@ -97,8 +102,6 @@
     title_size: 18
     title: "Truth Table Generator"
     size_hint: 0.6, 0.8
-    background: ''
-    bg_opacity: 0.5
     BoxLayout:
         orientation: "vertical"
         padding: 10
@@ -122,7 +125,7 @@
             rows: 1
             columns: 3
             padding: 5
-            spaceing: 5
+            spacing: 10
             TextInput:
                 id: truth_input
                 text: "Enter Boolean Expression"
@@ -131,15 +134,21 @@
                 multiline: False
                 on_text_validate: root.generate()
             Button:
+                color: rgba(app.BLACK)
                 text: 'Cancel'
                 on_release: root.dismiss()
                 size_hint: None, 1
                 width: 100
+                background_normal: ''
+                background_color: rgba(app.LIGHT_GREY)
             Button:
+                color: rgba(app.BLACK)
                 text: 'Generate' 
                 on_release: root.generate()
                 size_hint: None, 1
                 width: 100
+                background_normal: ''
+                background_color: rgba(app.LIGHT_GREY)
 
 <MainWindow>:
 
@@ -151,6 +160,7 @@
             height: 40
             pos_hint: {"top":1}
             ActionView:
+                padding: [0,0,10,0] 
                 ActionPrevious:
                     with_previous: False
                     font_size: 50
@@ -175,7 +185,7 @@
             size: self.parent.width, self.parent.height
             orientation: "tb-lr"
             cols: 3
-            padding: 10
+            padding: [10,0,10,10] 
             spacing: 10
             ScrollView:
                 size_hint: None, 1

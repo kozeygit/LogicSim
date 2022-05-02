@@ -722,22 +722,13 @@ kv = Builder.load_file("LogicSim.kv")
 class LogicGateSimulator(App):
     '''Kivy App class.'''
     
-    colours = [
-        '222222',
-        '062037',
-        '748bb4',
-        'DCDCDC',
-        'f1c4a5',
-        'FFFFFF',
-        '000000'
-        ]
-    DARK_GREY = StringProperty(colours[0])
-    col2 = StringProperty(colours[1])
-    BLUE = StringProperty(colours[2])
-    LIGHT_GREY = StringProperty(colours[3])
-    ORANGE = StringProperty(colours[4])
-    WHITE = StringProperty(colours[5])
-    BLACK = StringProperty(colours[6])
+    RED = StringProperty('FF0000')
+    DARK_GREY = StringProperty('222222')
+    BLUE = StringProperty('748bb4')
+    LIGHT_GREY = StringProperty('DCDCDC')
+    ORANGE = StringProperty('f1ae80')
+    WHITE = StringProperty('FFFFFF')
+    BLACK = StringProperty('000000')
     
     def build(self):
         '''Builds the kivy app.'''
