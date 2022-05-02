@@ -1,5 +1,22 @@
 #:kivy 2.0
 #:import Factory kivy.factory.Factory
+#:import rgba kivy.utils.rgba
+
+<GridLayout>:
+    canvas.before:
+        Color:
+            rgba: rgba(app.DARK_GREY)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<MyGridLayout@GridLayout>:
+    canvas.before:
+        Color:
+            rgba: rgba(app.BLUE)
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
 <ConnectionLine>:
     canvas:
@@ -8,49 +25,54 @@
 
 <ActionButton>:
     font_size:15
-    color: 0,0,0,1
-    background_normal: ''
-    background_color: 0.8,0.8,0.8,1
+    color: rgba(app.WHITE)
 
 <GateButton@Button>:
-    size_hint: None, None
     used: False
-    center: self.parent.center
+    size_hint: None, None
     background_normal: ''
-    background_color: 0.8,0.8,0.8,1
+    background_color: rgba(app.LIGHT_GREY)
     canvas:
         Color:
-            rgba: (0.9,0.2,0.2,1) if not self.used else (0,0,0,1)
+            rgba: (0.9,0.2,0.2,1) if not self.used else rgba(app.DARK_GREY)
         Line:
             width: 2
             rectangle: self.x, self.y, self.width, self.height
 
 <ToolToggleButton@ToggleButton>:
     font_size: 15
-    color: 0,0,0,1
-    background_normal: ''
-    background_color: 0.8,0.8,0.8,1
-    size_hint_y: None
-    size: 100,100
-    pos_hint: {"center_x":0.5}
+    color: rgba(app.BLACK)
+    size_hint: None, None
     allow_no_selection: False
+    background_normal: ''
+    background_color: rgba(app.LIGHT_GREY)
+    canvas:
+        Color:
+            rgba: rgba(app.DARK_GREY)
+        Line:
+            width: 2
+            rectangle: self.x, self.y, self.width, self.height
 
 <ToolButton@Button>:
     font_size: 15
-    color: 0,0,0,1
+    color: rgba(app.BLACK)
+    size_hint: None, None
     background_normal: ''
-    background_color: 0.8,0.8,0.8,1
-    size_hint_y: None
-    size: 100,100
-    pos_hint: {"center_x":0.5}
+    background_color: rgba(app.LIGHT_GREY)
+    canvas:
+        Color:
+            rgba: rgba(app.DARK_GREY)
+        Line:
+            width: 2
+            rectangle: self.x, self.y, self.width, self.height
 
 <GateLabel@Label>:
     font_size: 25
-    color: 1,1,1,1
+    color: rgba(app.BLACK)
 
 <ExitPopup>:
     auto_dismiss: True
-    title_color: 0,0,0,1
+    title_color: rgba(app.WHITE)
     title_size: 18
     title: "Are you sure you want to quit?\nAny unsaved progress will be lost"
     size_hint: None, None
@@ -58,22 +80,30 @@
     BoxLayout:
         Button:
             text: 'Cancel'
+            size_hint: None, None
+            height: 50
+            width: 100
             on_release: root.dismiss()
         Button:
             text: 'Quit'
+            size_hint: None, None
+            height: 50
+            width: 100
             on_release: root.close_window()
 
 <TruthPopup>:
     auto_dismiss: True
-    title_color: 0,0,0,1
+    title_color: rgba(app.WHITE)
     title_size: 18
     title: "Truth Table Generator"
     size_hint: 0.6, 0.8
+    background: ''
+    bg_opacity: 0.5
     BoxLayout:
         orientation: "vertical"
-        padding: 2
+        padding: 10
         ScrollView:
-            size_hint: 1, 0.6
+            size_hint: 1, 1
             do_scroll_x: False
             effect_cls: "ScrollEffect"
             Label:
@@ -84,17 +114,19 @@
                 halign: "center"
                 bold: True
                 font_name: root.FONT
-                color: (0,0,0,1)
+                font_size: 20
+                color: rgba(app.WHITE)
         GridLayout:
-            spacing: 2
-            padding: 2
             size_hint: 1, None
-            height: 50
+            height: 60
             rows: 1
             columns: 3
+            padding: 5
+            spaceing: 5
             TextInput:
                 id: truth_input
                 text: "Enter Boolean Expression"
+                font_size: 30
                 size_hint: 1, 1
                 multiline: False
                 on_text_validate: root.generate()
@@ -109,24 +141,6 @@
                 size_hint: None, 1
                 width: 100
 
-<GridLayout>:
-    canvas.before:
-        Color:
-            rgba: (0.8,0.8,0.8,1)
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-<MyGridLayout@GridLayout>:
-    padding: 2
-    spacing: 2
-    canvas.before:
-        Color:
-            rgba: (0.2,0.2,0.2,1)
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
 <MainWindow>:
 
     GridLayout:
@@ -137,14 +151,13 @@
             height: 40
             pos_hint: {"top":1}
             ActionView:
-                spacing: 2
-                padding: 2
                 ActionPrevious:
                     with_previous: False
-                    font_size: 40
+                    font_size: 50
                     markup: True
-                    title: " [b]Logic Gate Simulator[/b]"
+                    title: "[b]Logic Gate Simulator[/b]"
                     app_icon: ""
+                    app_icon_width: 0
                 ActionButton:
                     text: "Truth Table"
                     on_release: Factory.TruthPopup().open(root)
@@ -158,80 +171,37 @@
                     text: "Quit"
                     on_release: Factory.ExitPopup().open()
                 
-        
-        MyGridLayout:
+        GridLayout:
             size: self.parent.width, self.parent.height
-            orientation: "tb-rl"
+            orientation: "tb-lr"
             cols: 3
-            padding: 0
-            MyGridLayout:
-                orientation: "tb-lr"
-                cols:1
-                size_hint: None, 1
-                width: 100
-                Label:
-                    color: 1,1,1,1
-                    markup: True
-                    font_size: 30
-                    size_hint_y: None
-                    text: "[b]Tools[/b]"
-                ToolToggleButton:
-                    id: connectToggle
-                    group: "tools"
-                    text: "Connect"
-                    on_press: root.set_tool("connect")
-                ToolToggleButton:
-                    id: disconnectToggle
-                    group: "tools"
-                    text: "Disconnect"
-                    on_press: root.set_tool("disconnect")
-                ToolToggleButton:
-                    id: moveToggle
-                    state: "down"
-                    group: "tools"
-                    text: "Move"
-                    on_press: root.set_tool("move")
-                ToolButton:
-                    text: "Delete"
-                    on_press: root.delete_gate()
-                ToolButton:
-                    text: "Clear"
-                    on_press: root.clear_canvas()
-            GateCanvas:
-                id: gateCanvas
-                canvas.before:
-                    Color:
-                        rgba: (0.8,0.8,0.8,1)
-                    Rectangle:
-                        pos: map(lambda x: x+5, self.pos)
-                        size: map(lambda x: x-10, self.size)
-                canvas.after:
-                    Color:
-                        rgba: (0,0,0,1)
-                    Line:
-                        width: 4
-                        rectangle: (self.x+4, self.y+4, self.width-8, self.height-8)
+            padding: 10
+            spacing: 10
             ScrollView:
                 size_hint: None, 1
                 width: 200
                 effect_cls: "ScrollEffect"
+                canvas.before:
+                    Color:
+                        rgba: rgba(app.BLUE)
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
                 MyGridLayout:
                     size_hint_y: None
                     height: 900
                     cols: 1
                     rows: 2
+                    padding: 5
                     Label:
                         size_hint: 1,0.1
                         markup: True
                         font_size: 40
-                        color: 1,1,1,1
+                        color: rgba(app.BLACK)
                         text: "[b]Gates[/b]"
                     MyGridLayout:
                         cols: 2
-                        spaceing: 1
-                        padding: 1
                         size: self.parent.size
-                        
                         GateLabel:
                             text: "And"
                         GateButton:
@@ -336,4 +306,64 @@
                                 height: self.parent.height * 0.9
                                 center_x: self.parent.center_x
                                 center_y: self.parent.center_y
-                
+
+            GateCanvas:
+                id: gateCanvas
+                canvas.before:
+                    Color:
+                        rgba: rgba(app.LIGHT_GREY)
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            ScrollView:
+                size_hint: None, 1
+                width: 110
+                effect_cls: "ScrollEffect"
+                canvas.before:
+                    Color:
+                        rgba: rgba(app.ORANGE)
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                GridLayout:
+                    canvas.before:
+                        Color:
+                            rgba: rgba(app.ORANGE)
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                    orientation: "tb-lr"
+                    size_hint_y: None
+                    width: 110
+                    height: 700
+                    cols: 1
+                    padding: 5
+                    spacing: 10
+                    Label:
+                        color: rgba(app.BLACK)
+                        markup: True
+                        font_size: 30
+                        size_hint_y: None
+                        text: "[b]Tools[/b]"
+                    ToolToggleButton:
+                        id: connectToggle
+                        group: "tools"
+                        text: "Connect"
+                        on_press: root.set_tool("connect")
+                    ToolToggleButton:
+                        id: disconnectToggle
+                        group: "tools"
+                        text: "Disconnect"
+                        on_press: root.set_tool("disconnect")
+                    ToolToggleButton:
+                        id: moveToggle
+                        state: "down"
+                        group: "tools"
+                        text: "Move"
+                        on_press: root.set_tool("move")
+                    ToolButton:
+                        text: "Delete"
+                        on_press: root.delete_gate()
+                    ToolButton:
+                        text: "Clear"
+                        on_press: root.clear_canvas()

@@ -1,6 +1,7 @@
 '''Doctrings Incomplete'''
 
 ## Kivy GUI ##
+from ast import Str
 import sys
 import platform
 import kivy
@@ -18,11 +19,14 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
 from kivy.uix.popup import Popup
 from kivy.uix.widget import Widget
+from kivy.utils import platform
+from kivy.utils import rgba
 from tabulate import tabulate
 
 from logic.board import Board
 from logic.gates import *
 from logic.truth_table import *
+
 
 Window.maximize()
 
@@ -39,7 +43,7 @@ class TruthPopup(Popup):
     FONT = StringProperty()
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if platform.system() == "Linux":
+        if platform == 'linux':
             self.FONT = "FreeMonoBold"
         else:
             self.FONT = "LUCON"
@@ -51,7 +55,7 @@ class TruthPopup(Popup):
         if len(selected_gate) != 1:
             text = 'Enter Boolean Expression Here'
         else:
-            text = selected_gate[0].logic_gate.getExpression()
+            text = selected_gate[0].logic_gate.get_expression()
         self.ids["truth_input"].text = text
         self.generate()
 
@@ -525,7 +529,7 @@ class DragSwitch(DragGate):
                     return -1
         return False
 
-    def on_touch_up(self, touch):h
+    def on_touch_up(self, touch):
         '''When user releases click, checks dragged attribute, if false and the touch is within the set area, the switch is flipped and dragged is set as true, then super of method is called.'''
         if not self.dragged:
             if (touch.pos[0] < self.right - 30) and (touch.pos[0] > self.x + 10) and (touch.pos[1] < self.top - 20) and (touch.pos[1] > self.y + 20):
@@ -717,6 +721,24 @@ kv = Builder.load_file("LogicSim.kv")
 
 class LogicGateSimulator(App):
     '''Kivy App class.'''
+    
+    colours = [
+        '222222',
+        '062037',
+        '748bb4',
+        'DCDCDC',
+        'f1c4a5',
+        'FFFFFF',
+        '000000'
+        ]
+    DARK_GREY = StringProperty(colours[0])
+    col2 = StringProperty(colours[1])
+    BLUE = StringProperty(colours[2])
+    LIGHT_GREY = StringProperty(colours[3])
+    ORANGE = StringProperty(colours[4])
+    WHITE = StringProperty(colours[5])
+    BLACK = StringProperty(colours[6])
+    
     def build(self):
         '''Builds the kivy app.'''
         self.icon = "GateIcons/and.png"

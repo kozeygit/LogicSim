@@ -88,8 +88,8 @@ class Gate:
     def _process(self) -> None:
         '''Uses evaluate method to set output of self. If both input nodes empty, or any input nodes output is None, output is set to None.'''
         if self.has_input():
-            var1 = self._input_nodes[0].getOutput()
-            var2 = self._input_nodes[1].getOutput()
+            var1 = self._input_nodes[0].get_output()
+            var2 = self._input_nodes[1].get_output()
             if var1 == None or var2 == None:
                 self._output = None
             else:
@@ -100,15 +100,14 @@ class Gate:
     def update_expression(self) -> None:
         '''Updates the boolean expression of self. Used when connecting or disconnecting components to/from self.'''
         if self.has_input():
-            if self._input_nodes[0].getGateType() == 'switch':
-                exp1 = self._input_nodes[0].getExpression()
+            if self._input_nodes[0].get_gate_type() == 'switch':
+                exp1 = self._input_nodes[0].get_expression()
             else:
-                exp1 = f"({self._input_nodes[0].getExpression()})"
-                
-            if self._input_nodes[1].getGateType() == 'switch':
-                exp2 = self._input_nodes[1].getExpression()
+                exp1 = f"({self._input_nodes[0].get_expression()})"
+            if self._input_nodes[1].get_gate_type() == 'switch':
+                exp2 = self._input_nodes[1].get_expression()
             else:
-                exp2 = f"({self._input_nodes[1].getExpression()})"
+                exp2 = f"({self._input_nodes[1].get_expression()})"
             
             self._expression = f"{exp1} {self._type} {exp2}"
         else:
@@ -186,7 +185,7 @@ class Not_Gate(Gate):
     def _process(self) -> None:
         '''Uses evaluate method to set output of self. If has no input node, or input nodes output is None, output is set to None.'''
         if self.has_input():
-            var1 = self._input_nodes[0].getOutput()
+            var1 = self._input_nodes[0].get_output()
             if var1 == None:
                 self._output = None
             else:
@@ -196,6 +195,8 @@ class Not_Gate(Gate):
     
     def connect_node(self, gate, node) -> bool:
         '''Connects given component to given node of self.'''
+        if gate in self._input_nodes:
+            return False
         if node == 1:
             if not self.has_input():
                 self._input_nodes[0] = gate
@@ -204,6 +205,9 @@ class Not_Gate(Gate):
                 return True
             else:
                 return False
+        elif node == -1:
+            self._output_nodes.append(gate)
+            return True
   
     def disconnect_node(self, gate) -> bool:
         '''Disconnects given component from self.'''
@@ -224,11 +228,13 @@ class Not_Gate(Gate):
             self._input_nodes[0].disconnect_node(self)
             self._input_nodes[0] = None
             self.update_expression()
+        for gate in self._output_nodes:
+            gate.disconnect_node(self)
 
     def update_expression(self) -> None:
         '''Updates the boolean expression of self. Used when connecting or disconnecting components to/from self.'''
         if self.has_input():
-            self._expression = str(f"{self._type}({self._input_nodes[0].getExpression()})")
+            self._expression = str(f"{self._type}({self._input_nodes[0].get_expression()})")
         else:
             self._expression = None
 
@@ -298,7 +304,7 @@ class Output:
     def _process(self) -> None:
         '''Sets output of self to output of input node. If input node is empty, output is set to None.'''
         try:
-            self._output = self._input_nodes[0].getOutput()
+            self._output = self._input_nodes[0].get_output()
         except AttributeError as e:
             print(e, len(self._input_nodes))
             self._output = None
@@ -331,7 +337,7 @@ class Output:
 
     def get_expression(self) -> str:
         '''Return boolean expression of input component.'''
-        return self._input_nodes[0].getExpression()
+        return self._input_nodes[0].get_expression()
 
     def get_name(self) -> str:
         '''Returns the name of self. Name is string: type_id.'''
