@@ -1,7 +1,6 @@
 '''Doctrings Incomplete'''
 
 ## Kivy GUI ##
-from ast import Str
 import sys
 import platform
 import kivy
