@@ -26,7 +26,8 @@ from logic.board import Board
 from logic.gates import *
 from logic.truth_table import *
 
-
+Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+Config.set('kivy', 'desktop', 1)
 Window.maximize()
 
 
@@ -51,10 +52,14 @@ class TruthPopup(Popup):
         '''Overwrite of kivy method, inserts selected components expression into input field.'''
         super().open(*args, **kwargs)
         selected_gate = root.ids["gateCanvas"].get_selected_gates()
+        
         if len(selected_gate) != 1:
             text = 'Enter Boolean Expression Here'
         else:
             text = selected_gate[0].logic_gate.get_expression()
+            if text == None:
+                text = 'Enter Boolean Expression Here'
+                
         self.ids["truth_input"].text = text
         self.generate()
 

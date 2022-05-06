@@ -306,7 +306,6 @@ class Output:
         try:
             self._output = self._input_nodes[0].get_output()
         except AttributeError as e:
-            print(e, len(self._input_nodes))
             self._output = None
   
     def connect_node(self, gate, node) -> bool:
