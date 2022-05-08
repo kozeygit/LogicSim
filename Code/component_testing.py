@@ -1,8 +1,9 @@
-from pyparsing import And
 from logic.gates import *
 from logic.board import *
 from logic.truth_table import generate_truth_table
 import unittest
+
+'''Testing the logic side of the components.'''
 
 class TestCreatingComponents(unittest.TestCase):
     '''Test: When components are made they are of the correct type and have empty outputs and inputs.'''
@@ -300,7 +301,6 @@ class TestStatesCorrectlyChange(unittest.TestCase):
         self.assertEqual(self.xor_gate.get_output(), 1) #[0,1] -> 1
         self.switch1.flip()
         self.assertEqual(self.xor_gate.get_output(), 0) #[1,1] -> 0
-    
     def test_not(self):
         self.board.connect_gate(self.not_gate, self.switch1, 1)
         self.assertEqual(self.not_gate.get_output(), 1) #[0] -> 1
@@ -327,6 +327,8 @@ class TestTruthTable(unittest.TestCase):
         self.board.add_gate(self.output)
         
     def test_with_valid_expression(self):
+        '''generate_truth_table returns a tuple with the truth table dictionary and the expression string.
+        Tests that the truth dictionary is correct as expression will not change.'''
         expression = "A AND B"
         tt = generate_truth_table(expression)
         self.assertDictEqual(
@@ -345,7 +347,5 @@ class TestTruthTable(unittest.TestCase):
         self.assertEqual(tt, "Invalid Input")
         
         
-        
-
 if __name__ == '__main__':
     unittest.main()
