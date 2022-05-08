@@ -31,3 +31,28 @@ user testing - having the end-user test the completed system
 
 Place screen shots for test in seperate document
 can use video
+
+
+
+3. There will be a graphical user interface.
+	
+	3.1. It will allow for the dynamic placing of the components onto a canvas.
+		3.1.1. It will use mouse inputs to drag the components and move them about the canvas.
+	
+	3.2. It will have a component toolbar that will have buttons that can add components to the canvas.
+		3.2.1. The gates will have an indicator showing whether they have been used in the current session.
+	
+	3.3. It will have a tool toolbar that will determine what happens when the components are interacted with depending on the tool selected.
+		3.3.1. Connect tool: the program will tell the board to connect the selected components.
+		3.3.2. Disconnect tool: the program will disconnect the selected components from each other.
+		3.3.3. Move tool: the selected component can be moved about the canvas.
+		3.3.4. Delete tool: the selected components will be deleted.
+		3.3.5. Clear tool: All components will be deleted.
+		3.3.6. Truth Table tool: the program will show a truth table based on the expression of the selected component.
+			3.3.6.1. It will show a popup with a truth table and text input box that the user can enter their own expression into
+	
+	3.4. It will have a menu bar with options:
+		3.4.1. Save, which saves the current circuit to a JSON file.
+		3.4.2. Load, which loads a circuit from a JSON file.
+		3.4.3. Quit, which exits the program.
+			3.4.3.1. When clicked, a popup will appear asking if you are sure you want to exit.
