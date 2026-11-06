@@ -1,6 +1,6 @@
-from logic.gates import *
-from logic.board import *
-from logic.truth_table import generate_truth_table
+from logicsim.logic.gates import *
+from logicsim.logic.board import *
+from logicsim.logic.truth_table import generate_truth_table
 import unittest
 
 '''Testing the logic side of the components.'''

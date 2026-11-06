@@ -1,5 +1,5 @@
-from logic.gates import *
-from logic.truth_table import *
+from logicsim.logic.gates import *
+from logicsim.logic.truth_table import *
 
 '''Docstrings Done, Not proofread'''
 

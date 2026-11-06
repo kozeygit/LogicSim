@@ -22,9 +22,9 @@ from kivy.utils import platform
 from kivy.utils import rgba
 from tabulate import tabulate
 
-from logic.board import Board
-from logic.gates import *
-from logic.truth_table import *
+from logicsim.logic.board import Board
+from logicsim.logic.gates import *
+from logicsim.logic.truth_table import *
 
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 Config.set('kivy', 'desktop', 1)
