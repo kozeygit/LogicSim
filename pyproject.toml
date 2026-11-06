@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "kivy>=2.3.1",
+    "tabulate>=0.10.0",
 ]
 
 [project.scripts]

@@ -1,6 +1,7 @@
 '''Doctrings Incomplete'''
 
 ## Kivy GUI ##
+import os
 import sys
 import platform
 import kivy
@@ -77,9 +78,90 @@ class TruthPopup(Popup):
             self.ids["truth_label"].text = f"{out[1]}\n{out2}"
 
 
-class ConnectionLine(Widget):
+class LineMidNode(DragBehavior, FloatLayout):
+    '''Visual components parent class. DOCSRINGS NOT DONE'''
+    node_source="src/logicsim/assets/node.png"
+    def __init__(self, parent_line, init_pos, **kwargs):
+        super().__init__(**kwargs)
+        '''Sets kivy properties'''
+        self.drag_timeout = 500
+        self.drag_distance = 5
+        self.allow_stretch = True
+        self.size_hint = None, None
+        self.size = (10,10)
+        self.pos = init_pos
+        '''Sets image of component'''
+        self.img = Image(pos = self.pos, source="src/logicsim/assets/node.png", size_hint=(1, 1))
+        self.add_widget(self.img)
+        '''Creates the selection border and adds to component.'''
+        self.border = Line(rounded_rectangle = (self.x, self.y, self.width, self.height, 10))
+        self.canvas.add(Color(0,0,0,1))
+        self.canvas.add(self.border)
+        self.parent_line = parent_line
+        '''Creates dragged attribute and selects the component.'''
+        self.dragged = False
+        self.selected = False
+        self.select()
+
+    def on_pos(self, *args, **kwargs):
+        '''Listens for change of kivy pos property. Updates position of image, nodes and selection border. Also tells board to update position of connection lines.'''
+        try:
+            self.img.pos = self.pos
+            self.parent_line.update_pos()
+        except AttributeError as e:
+            print("Gate not finished initalising", e)
+
+    def select(self):
+        '''Selects the component.'''
+        self.selected = True
+        self.border.width = 2
+
+    def deselect(self):
+        '''Deselects the component'''
+        self.selected = False
+        self.border.width = 0.0001
+    
+    def on_touch_down(self, touch):
+        '''Checks if user has clicked node, sets dragged attribute to false.'''
+        if self.collide_point(*touch.pos):
+            self.dragged = False
+        return super().on_touch_down(touch)
+
+    def on_touch_move(self, touch):
+        '''Checks if the user drags the component when clicked. Sets dragged attribute to true, selectes component updates position if user drags within the drag_timeout time and a distance greater than the drag_distance distance.'''
+        if touch.grab_current is not self:
+            return super().on_touch_move(touch)
+        self.select()
+        self.dragged = True
+        self.parent_line.moving_node = True
+        if self.x < self.parent.x+5:
+            self.x = self.parent.x+5
+        elif self.y < self.parent.y+5:
+            self.y = self.parent.y+5
+        elif self.right > self.parent.right-5:
+            self.right = self.parent.right-5
+        elif self.top > self.parent.top-5:
+            self.top = self.parent.top-5
+        else:
+            return super().on_touch_move(touch)
+
+    def on_touch_up(self, touch):
+        '''When user releases click, checks dragged attribute, if true component is deselected, if false and the component is already selected the component is also deselected, if both false component is selected.'''
+        if not self.collide_point(*touch.pos):
+            return super().on_touch_up(touch)
+        if self.dragged:
+            self.deselect()
+        elif self.selected:
+            self.deselect()
+        else:
+            self.select()
+        return super().on_touch_up(touch)
+
+
+class ConnectionLine(DragBehavior, Widget):
     '''Class for lines that connects components together'''
     color_state = ListProperty()
+    node_source="src/logicsim/assets/node.png"
     def __init__(self, out_gate, in_gate, in_node, **kwargs):
         super().__init__(**kwargs)
         self.color_states = {None:(1,1,1,1), 0:(1,0,0,1), 1:(0,1,0,1)}
@@ -88,6 +170,9 @@ class ConnectionLine(Widget):
         self.in_gate = in_gate
         self.in_node = in_node
         self.points = []
+        self.mid_nodes: list[LineMidNode] = []
+        self.selected_node = None
+        self.moving_node = False
         self.state = None
         self.inline = Line(points=self.points, width=1.5, cap='round', joint='round')
         self.outline = Line(points=self.points, width=4, cap='round', joint='round')
@@ -96,7 +181,18 @@ class ConnectionLine(Widget):
         self.canvas.before.add(self.outline)
         self.update_pos()
         self.update_state()
-        
+
+    def add_mid_node(self, pos):
+        new_node = LineMidNode(self, pos)
+        self.mid_nodes.append(new_node)
+
+    def remove_mid_node(self, node):
+        self.mid_nodes.remove(node)
+        self.update_pos()
+
+    def get_mid_node_positions(self):
+        return list(map(lambda node: node.pos, self.mid_nodes))
+
     def get_gates(self):
         '''Returns tuple: (component line is exiting, component line is entering)'''
         return (self.out_gate, self.in_gate)
@@ -125,9 +221,26 @@ class ConnectionLine(Widget):
         '''Updates the points of the line to match the position of the components its connect to.'''
         out_node_pos = self.out_gate.get_node_pos(-1)
         in_node_pos = self.in_gate.get_node_pos(self.in_node)
-        self.points = out_node_pos + self.get_turn_points(out_node_pos, in_node_pos) + in_node_pos
+        mid_points = self.get_mid_node_positions()
+        self.points = out_node_pos + list(mid_points) + in_node_pos
         self.outline.points = self.points
         self.inline.points = self.points
+
+    def on_touch_down(self, touch):
+        self.moving_node = False
+
+        if self.collide_point(*touch.pos): 
+            for node in self.mid_nodes:
+                if node.collide_point(*touch.pos):
+                    self.selected_node = node
+            else:
+                self.add_mid_node(touch.pos)
+    
+    def on_touch_up(self, touch):
+        if (self.moving_node == False and self.selected_node == True):
+            self.remove_mid_node(self.selected_node)
+        
+        self.selected_node = None
 
 
 class GateCanvas(FloatLayout):
@@ -186,6 +299,7 @@ class GateCanvas(FloatLayout):
             if touch.is_double_tap and self.tool != "move":
                 self.root.set_tool("move")
                 return True
+                
             if self.tool == "connect":
                 return self.connect_down(touch)
             
@@ -196,7 +310,7 @@ class GateCanvas(FloatLayout):
                 return self.move_down(touch)
 
     def on_touch_up(self, touch):
-        '''Checks if there is a touch up within the canvas, Calls a method based on the cuurent tool if there is'''
+        '''Checks if there is a touch up within the canvas, Calls a method based on the current tool if there is'''
         if self.collide_point(*touch.pos):
             if self.tool == "connect":
                 return self.connect_up(touch)
@@ -253,11 +367,17 @@ class GateCanvas(FloatLayout):
 
     def move_down(self, touch):
         '''Calls on_touch_down method for children. If canvas clicked instead of a child, deselects all gates.'''
+        if not self.collide_point(*touch.pos):
+            return False
+
         for child in self.gates[::-1]:
             if child.dispatch('on_touch_down', touch):
                 return True
-        if not self.collide_point(*touch.pos):
-            return False
+
+        for child in self.connection_lines[::-1]:
+            if child.dispatch('on_touch_down', touch):
+                return True
+
         self.deselect_gates()
         return True
     
@@ -266,7 +386,6 @@ class GateCanvas(FloatLayout):
         self.deselect_gates()
         for gate in self.gates[:]:
             if node := gate.get_node_collide(touch):
-                
                 if node == -1:
                     for line in self.connection_lines:
                         gate_node_tuple = line.get_nodes()
@@ -362,7 +481,7 @@ class DragGate(DragBehavior, FloatLayout):
         
     def nodes_init(self):
         '''Initialises the nodes of the component, positions them and adds them to the component widget.'''
-        node_source="GateIcons/node.png"
+        node_source="src/logicsim/assets/node.png"
         self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.in_node_2 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
@@ -510,12 +629,12 @@ class DragSwitch(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.logic_gate = Switch()
-        self.states = {1:"GateIcons/switch_on.png", 0:"GateIcons/switch_off.png"}
+        self.states = {1:"src/logicsim/assets/switch_on.png", 0:"src/logicsim/assets/switch_off.png"}
         self.img.source = self.states[self.logic_gate.get_output()]
 
     def nodes_init(self):
         '''Initialises the nodes of the component, positions them and adds them to the component widget.'''
-        node_source="GateIcons/node.png"
+        node_source="src/logicsim/assets/node.png"
         self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.out_node)
         self.nodes.append(self.out_node)
@@ -555,7 +674,7 @@ class DragClock(DragGate):
         super().__init__(**kwargs)
         self.logic_gate = Switch()
         
-        self.states = {1:"GateIcons/clock_on.png", 0:"GateIcons/clock_off.png"}
+        self.states = {1:"src/logicsim/assets/clock_on.png", 0:"src/logicsim/assets/clock_off.png"}
         self.img.source = self.states[self.logic_gate.get_output()]
         Clock.schedule_interval(self.clock_flip, 1)
 
@@ -571,7 +690,7 @@ class DragClock(DragGate):
 
     def nodes_init(self):
         '''Initialises the nodes of the component, positions them and adds them to the component widget.'''
-        node_source="GateIcons/node.png"
+        node_source="src/logicsim/assets/node.png"
         self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.out_node)
         self.nodes.append(self.out_node)
@@ -600,12 +719,12 @@ class DragOutput(DragGate):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.logic_gate = Output()
-        self.states = {1:"GateIcons/output_on.png", 0:"GateIcons/output_off.png", None:"GateIcons/output_empty.png"}
+        self.states = {1:"src/logicsim/assets/output_on.png", 0:"src/logicsim/assets/output_off.png", None:"src/logicsim/assets/output_empty.png"}
         self.update_state()
 
     def nodes_init(self):
         '''Initialises the nodes of the component, positions them and adds them to the component widget.'''
-        node_source="GateIcons/node.png"
+        node_source="src/logicsim/assets/node.png"
         self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.in_node_1)
         self.nodes.append(self.in_node_1)
@@ -634,33 +753,33 @@ class DragAndGate(DragGate):
     '''And Gate visual component.'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.img.source = "GateIcons/and.png"
+        self.img.source = "src/logicsim/assets/and.png"
         self.logic_gate = And_Gate()
 
 class DragOrGate(DragGate):
     '''And Or visual component.'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.img.source = "GateIcons/or.png"
+        self.img.source = "src/logicsim/assets/or.png"
         self.logic_gate = Or_Gate()
 
 class DragXorGate(DragGate):
     '''And Xor visual component.'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.img.source = "GateIcons/xor.png"
+        self.img.source = "src/logicsim/assets/xor.png"
         self.logic_gate = Xor_Gate()
 
 class DragNotGate(DragGate):
     '''Not Gate visual component.'''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.img.source = "GateIcons/not.png"
+        self.img.source = "src/logicsim/assets/not.png"
         self.logic_gate = Not_Gate()
 
     def nodes_init(self):
         '''Initialises the nodes of the component, positions them and adds them to the component widget.'''
-        node_source="GateIcons/node.png"
+        node_source="src/logicsim/assets/node.png"
         self.in_node_1 = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.out_node = Image(source=node_source, size_hint=(None, None), size=(20,20))
         self.add_widget(self.in_node_1)
@@ -719,8 +838,12 @@ class MainWindow(Widget):
         self.ids["gateCanvas"].delete_gate()
         self.set_tool("move")
 
+try:
+    kv = Builder.load_file("src/logicsim/interface/LogicSim.kv")
+except Exception as e:
+    print(e)
+    print(os.getcwd())
 
-kv = Builder.load_file("LogicSim.kv")
 '''Loads the kivy file'''
 
 class LogicGateSimulator(App):
@@ -736,7 +859,7 @@ class LogicGateSimulator(App):
     
     def build(self):
         '''Builds the kivy app.'''
-        self.icon = "GateIcons/and.png"
+        self.icon = "src/logicsim/assets/and.png"
         return MainWindow()
 
 if __name__ == '__main__':
